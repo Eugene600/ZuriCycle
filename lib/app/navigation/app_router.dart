@@ -16,7 +16,7 @@ final routesProvider = Provider<GoRouter>((ref) {
 
 class RouterNotifier extends ChangeNotifier {
   List<GoRoute> get routes => [
-    GoRoute(
+        GoRoute(
           name: RouteNames.WELCOME_SCREEN,
           path: '/welcome-screen',
           builder: (BuildContext context, GoRouterState state) {
@@ -26,14 +26,20 @@ class RouterNotifier extends ChangeNotifier {
         ),
       ];
 
-
   List<GoRoute> authRoutes = [
     GoRoute(
-          name: RouteNames.LOGIN_SCREEN,
-          path: '/login',
-          builder: (BuildContext context, GoRouterState state) {
-            return const Login();
-          },
-        ),
-  ];    
+      name: RouteNames.LOGIN_SCREEN,
+      path: '/login',
+      builder: (BuildContext context, GoRouterState state) {
+        return const Login();
+      },
+    ),
+    GoRoute(
+      name: RouteNames.REGISTRATION_SCREEN,
+      path: '/register',
+      builder: (BuildContext context, GoRouterState state) {
+        return const RegistrationScreen();
+      },
+    ),
+  ];
 }

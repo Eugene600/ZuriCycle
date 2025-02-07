@@ -72,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               OutlinedButton(
                 onPressed: () {
-                  //Will add later
+                  context.goNamed(RouteNames.REGISTRATION_SCREEN);
                 },
                 child: const Text("Register"),
               ),

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../display/display.dart';
 import '../../../utils/utils.dart';
+import '../auth.dart';
 
-class Login extends StatefulWidget {
+class Login extends ConsumerStatefulWidget {
   const Login({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  ConsumerState<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends ConsumerState<Login> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _hidePassword = true;
   // bool _loading = false;
@@ -75,19 +77,19 @@ class _LoginState extends State<Login> {
                               fontSize: 16,
                             ),
                           ),
-                            FormBuilderTextField(
-                              name: 'email',
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                hintText: "e.g abc@gmail.com",
-                                prefixIcon: Icon(Icons.email),
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.required(),
-                                FormBuilderValidators.email(),
-                              ]),
+                          FormBuilderTextField(
+                            name: 'email',
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              hintText: "e.g abc@gmail.com",
+                              prefixIcon: Icon(Icons.email),
+                              border: OutlineInputBorder(),
                             ),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(),
+                              FormBuilderValidators.email(),
+                            ]),
+                          ),
                           const SizedBox(height: Constants.SPACING),
                           const Text(
                             "Password",
@@ -119,7 +121,22 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(height: 20),
                           OutlinedButton(
-                              onPressed: () {}, child: const Text("Login")),
+                            onPressed: () async {
+                              if (_formKey.currentState?.saveAndValidate() ??
+                                  false) {
+                                final email =
+                                    _formKey.currentState?.value['email'];
+                                final password =
+                                    _formKey.currentState?.value['password'];
+
+                                ref
+                                    .read(userNotifierProvider.notifier)
+                                    .login(email, password);
+                              }
+                            },
+                            child: const Text("Login"),
+                          ),
+
                           const SizedBox(height: Constants.SPACING),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
