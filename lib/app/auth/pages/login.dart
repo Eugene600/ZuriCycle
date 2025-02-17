@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -124,56 +125,60 @@ class _LoginState extends ConsumerState<Login> {
                           const SizedBox(height: 20),
 
                           /// **Login Button with Loading State**
-                          ElevatedButton(
-                            onPressed: userState is AsyncLoading
-                                ? null
-                                : () async {
-                                    if (_formKey.currentState
-                                            ?.saveAndValidate() ??
-                                        false) {
-                                      final email =
-                                          _formKey.currentState?.value['email'];
-                                      final password = _formKey
-                                          .currentState?.value['password'];
-
-                                      final contextBeforeAwait =
-                                          context; // Store context before async call
-
-                                      final result = await ref
-                                          .read(userNotifierProvider.notifier)
-                                          .login(email, password);
-
-                                      if (contextBeforeAwait.mounted) {
-                                        // Check mounted on stored context
-                                        if (result.contains("successful")) {
-                                          ScaffoldMessenger.of(
-                                                  contextBeforeAwait)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content:
-                                                  Text("Login successful!"),
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
-                                          contextBeforeAwait
-                                              .goNamed(RouteNames.HOME_SCREEN);
-                                        } else {
-                                          ScaffoldMessenger.of(
-                                                  contextBeforeAwait)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  "Login failed, please try again"),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
+                          Center(
+                            child: OutlinedButton(
+                              onPressed: userState is AsyncLoading
+                                  ? null
+                                  : () async {
+                                      if (_formKey.currentState
+                                              ?.saveAndValidate() ??
+                                          false) {
+                                        final email =
+                                            _formKey.currentState?.value['email'];
+                                        final password = _formKey
+                                            .currentState?.value['password'];
+                            
+                                        final contextBeforeAwait =
+                                            context; // Store context before async call
+                            
+                                        final result = await ref
+                                            .read(userNotifierProvider.notifier)
+                                            .login(email, password);
+                            
+                                        if (contextBeforeAwait.mounted) {
+                                          // Check mounted on stored context
+                                          if (result.contains("successful")) {
+                                            ScaffoldMessenger.of(
+                                                    contextBeforeAwait)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content:
+                                                    Text("Login successful!"),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                            contextBeforeAwait
+                                                .goNamed(RouteNames.HOME_SCREEN);
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                                    contextBeforeAwait)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    "Login failed, please try again"),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
                                         }
                                       }
-                                    }
-                                  },
-                            child: userState is AsyncLoading
-                                ? const CircularProgressIndicator()
-                                : const Text("Login"),
+                                    },
+                              child: userState is AsyncLoading
+                                  ? CircularProgressIndicator(
+                                      color: theme.colorScheme.primary,
+                                    )
+                                  : const Text("Login"),
+                            ),
                           ),
 
                           const SizedBox(height: Constants.SPACING),

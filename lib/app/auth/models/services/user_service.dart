@@ -8,53 +8,58 @@ import '../../../../local_storage/local_storage.dart';
 import '../../../../utils/utils.dart';
 import '../../auth.dart';
 
-
 class UserService {
   Future<Either<String, dynamic>> register(User user) async {
-    try {
-      var response = await http.post(
-        Uri.parse("${Constants.BASE_URL}/signup/"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(user.toJson()),
-      );
+  try {
+    var response = await http.post(
+      Uri.parse("${Constants.BASE_URL}/signup/"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(user.toJson()),
+    );
 
-      if (response.statusCode == 201) {
-        var jsonData = jsonDecode(response.body);
-        debugPrint("Register Response JSON: $jsonData");
-        debugPrint("Access Token: ${jsonData['access']}");
-        debugPrint("Refresh Token: ${jsonData['refresh']}");
+    if (response.statusCode == 201) {
+      var jsonData = jsonDecode(response.body);
+      debugPrint("Register Response JSON: $jsonData");
 
-        // Save the tokens in local storage
-        if (jsonData['access'] != null && jsonData['refresh'] != null) {
-          // Storing the tokens as TokenPair
-          TokenPair tokenPair = TokenPair(
-            access: jsonData['access'],
-            refresh: jsonData['refresh'],
-          );
-          await LocalStorage.saveToken(tokenPair);
+      // Extract tokens properly
+      var tokens = jsonData['tokens'] as Map<String, dynamic>?;
 
-          // Returning the User object
-          if (jsonData.containsKey('user')) {
-            User user = User.fromJson(jsonData['user']);
-            return Right(user);
-          } else {
-            debugPrint('User object missing in the response');
-            return const Left('User object missing in the response');
-          }
+      if (tokens != null &&
+          tokens.containsKey('access') &&
+          tokens.containsKey('refresh') &&
+          tokens['access'] is String &&
+          tokens['refresh'] is String) {
+        TokenPair tokenPair = TokenPair(
+          access: tokens['access'],
+          refresh: tokens['refresh'],
+        );
+        await LocalStorage.saveToken(tokenPair);
+
+        debugPrint("Access Token: ${tokenPair.access}");
+        debugPrint("Refresh Token: ${tokenPair.refresh}");
+
+        // Returning the User object
+        if (jsonData.containsKey('user')) {
+          User user = User.fromJson(jsonData['user']);
+          return Right(user);
         } else {
-          debugPrint('Missing access or refresh token in the response');
-          return const Left('Missing access or refresh token in the response');
+          debugPrint('User object missing in the response');
+          return const Left('User object missing in the response');
         }
       } else {
-        debugPrint("Error: ${response.body}");
-        return Left(
-            'Failed to register user. Status code: ${response.statusCode}');
+        debugPrint('Missing or invalid access/refresh token in the response');
+        return const Left('Missing or invalid access/refresh token in the response');
       }
-    } catch (e) {
-      debugPrint('Error registering user: $e');
-      return Left('Error registering user: $e');
+    } else {
+      debugPrint("Error: ${response.body}");
+      return Left('Failed to register user. Status code: ${response.statusCode}');
     }
+  } catch (e) {
+    debugPrint('Error registering user: $e');
+    return Left('Error registering user: $e');
   }
+}
+
 
   Future<Either<String, TokenPair>> login(String email, String password) async {
     try {

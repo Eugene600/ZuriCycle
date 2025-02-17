@@ -11,8 +11,9 @@ class User with _$User {
     required String email,
     required String phone_number,
     required String gender,
-    required DateTime birth_date,
-    required String password,
+    String? birth_date,
+    String? password,
+    String? date_joined,
   }) = _User;
 
   factory User.fromJson(Map<String, Object?> json)

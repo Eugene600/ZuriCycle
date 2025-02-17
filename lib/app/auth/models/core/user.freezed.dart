@@ -25,8 +25,9 @@ mixin _$User {
   String get email => throw _privateConstructorUsedError;
   String get phone_number => throw _privateConstructorUsedError;
   String get gender => throw _privateConstructorUsedError;
-  DateTime get birth_date => throw _privateConstructorUsedError;
-  String get password => throw _privateConstructorUsedError;
+  String? get birth_date => throw _privateConstructorUsedError;
+  String? get password => throw _privateConstructorUsedError;
+  String? get date_joined => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,8 +45,9 @@ abstract class $UserCopyWith<$Res> {
       String email,
       String phone_number,
       String gender,
-      DateTime birth_date,
-      String password});
+      String? birth_date,
+      String? password,
+      String? date_joined});
 }
 
 /// @nodoc
@@ -66,8 +68,9 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? email = null,
     Object? phone_number = null,
     Object? gender = null,
-    Object? birth_date = null,
-    Object? password = null,
+    Object? birth_date = freezed,
+    Object? password = freezed,
+    Object? date_joined = freezed,
   }) {
     return _then(_value.copyWith(
       first_name: null == first_name
@@ -90,14 +93,18 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
           ? _value.gender
           : gender // ignore: cast_nullable_to_non_nullable
               as String,
-      birth_date: null == birth_date
+      birth_date: freezed == birth_date
           ? _value.birth_date
           : birth_date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      password: null == password
+              as String?,
+      password: freezed == password
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      date_joined: freezed == date_joined
+          ? _value.date_joined
+          : date_joined // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -115,8 +122,9 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       String email,
       String phone_number,
       String gender,
-      DateTime birth_date,
-      String password});
+      String? birth_date,
+      String? password,
+      String? date_joined});
 }
 
 /// @nodoc
@@ -134,8 +142,9 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? email = null,
     Object? phone_number = null,
     Object? gender = null,
-    Object? birth_date = null,
-    Object? password = null,
+    Object? birth_date = freezed,
+    Object? password = freezed,
+    Object? date_joined = freezed,
   }) {
     return _then(_$UserImpl(
       first_name: null == first_name
@@ -158,14 +167,18 @@ class __$$UserImplCopyWithImpl<$Res>
           ? _value.gender
           : gender // ignore: cast_nullable_to_non_nullable
               as String,
-      birth_date: null == birth_date
+      birth_date: freezed == birth_date
           ? _value.birth_date
           : birth_date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      password: null == password
+              as String?,
+      password: freezed == password
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      date_joined: freezed == date_joined
+          ? _value.date_joined
+          : date_joined // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -179,8 +192,9 @@ class _$UserImpl implements _User {
       required this.email,
       required this.phone_number,
       required this.gender,
-      required this.birth_date,
-      required this.password});
+      this.birth_date,
+      this.password,
+      this.date_joined});
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -196,13 +210,15 @@ class _$UserImpl implements _User {
   @override
   final String gender;
   @override
-  final DateTime birth_date;
+  final String? birth_date;
   @override
-  final String password;
+  final String? password;
+  @override
+  final String? date_joined;
 
   @override
   String toString() {
-    return 'User(first_name: $first_name, last_name: $last_name, email: $email, phone_number: $phone_number, gender: $gender, birth_date: $birth_date, password: $password)';
+    return 'User(first_name: $first_name, last_name: $last_name, email: $email, phone_number: $phone_number, gender: $gender, birth_date: $birth_date, password: $password, date_joined: $date_joined)';
   }
 
   @override
@@ -221,13 +237,15 @@ class _$UserImpl implements _User {
             (identical(other.birth_date, birth_date) ||
                 other.birth_date == birth_date) &&
             (identical(other.password, password) ||
-                other.password == password));
+                other.password == password) &&
+            (identical(other.date_joined, date_joined) ||
+                other.date_joined == date_joined));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, first_name, last_name, email,
-      phone_number, gender, birth_date, password);
+      phone_number, gender, birth_date, password, date_joined);
 
   @JsonKey(ignore: true)
   @override
@@ -250,8 +268,9 @@ abstract class _User implements User {
       required final String email,
       required final String phone_number,
       required final String gender,
-      required final DateTime birth_date,
-      required final String password}) = _$UserImpl;
+      final String? birth_date,
+      final String? password,
+      final String? date_joined}) = _$UserImpl;
 
   factory _User.fromJson(Map<String, dynamic> json) = _$UserImpl.fromJson;
 
@@ -266,9 +285,11 @@ abstract class _User implements User {
   @override
   String get gender;
   @override
-  DateTime get birth_date;
+  String? get birth_date;
   @override
-  String get password;
+  String? get password;
+  @override
+  String? get date_joined;
   @override
   @JsonKey(ignore: true)
   _$$UserImplCopyWith<_$UserImpl> get copyWith =>

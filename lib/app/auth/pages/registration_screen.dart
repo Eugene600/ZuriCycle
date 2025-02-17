@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../display/display.dart';
 import '../../../utils/utils.dart';
+import '../auth.dart';
 
-class RegistrationScreen extends StatefulWidget {
+class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  ConsumerState<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _hidePassword = true;
 
@@ -26,6 +29,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final userState = ref.watch(userNotifierProvider);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -40,7 +44,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
           SliverToBoxAdapter(
             child: ResponsiveWidgetFormLayout(
-              buildPageContent: (BuildContext context, Color? color) => SafeArea(
+              buildPageContent: (BuildContext context, Color? color) =>
+                  SafeArea(
                 child: Container(
                   padding: const EdgeInsets.all(Constants.SPACING * 2),
                   decoration: BoxDecoration(
@@ -64,7 +69,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               child: Text(
                                 "ZuriCycle".toUpperCase(),
                                 style: TextStyle(
-                                    fontSize: theme.textTheme.displayLarge?.fontSize,
+                                    fontSize:
+                                        theme.textTheme.displayLarge?.fontSize,
                                     color: theme.colorScheme.primary),
                               ),
                             ),
@@ -111,9 +117,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               ),
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'Male', child: Text('Male')),
+                                    value: 'male', child: Text('Male')),
                                 DropdownMenuItem(
-                                    value: 'Female', child: Text('Female')),
+                                    value: 'female', child: Text('Female')),
                                 // DropdownMenuItem(
                                 //     value: 'Other', child: Text('Other')),
                               ],
@@ -229,11 +235,79 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               ]),
                             ),
                             const SizedBox(height: 20),
-                            OutlinedButton(
-                              onPressed: () {
-                                //Will add later more logic
-                              }, 
-                              child: const Text("Register"),
+                            Center(
+                              child: OutlinedButton(
+                                onPressed: userState is AsyncLoading
+                                    ? null
+                                    : () async {
+                                        if (_formKey.currentState
+                                                ?.saveAndValidate() ??
+                                            false) {
+                                          final formValues =
+                                              _formKey.currentState!.value;
+
+                                          final formattedDob =
+                                              formValues['dob'] != null
+                                                  ? DateFormat('yyyy-MM-dd')
+                                                      .format(formValues['dob'])
+                                                  : null;
+
+                                          debugPrint(
+                                              "The date is ${formValues['dob']}");
+
+                                          final user = User(
+                                            first_name:
+                                                formValues['first_name'],
+                                            last_name: formValues['last_name'],
+                                            gender: formValues['gender'],
+                                            email: formValues['email'],
+                                            birth_date: formattedDob,
+                                            phone_number:
+                                                formValues['phone_number'],
+                                            password: formValues['password'],
+                                          );
+
+                                          final contextBeforeAwait =
+                                              context; // Store context before async call
+
+                                          final result = await ref
+                                              .read(
+                                                  userNotifierProvider.notifier)
+                                              .register(user);
+
+                                          if (contextBeforeAwait.mounted) {
+                                            if (result.contains("successful")) {
+                                              ScaffoldMessenger.of(
+                                                      contextBeforeAwait)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      "Registration successful!"),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                              contextBeforeAwait.goNamed(
+                                                  RouteNames.HOME_SCREEN);
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                      contextBeforeAwait)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      "Registration failed, Please try again"),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        }
+                                      },
+                                child: userState is AsyncLoading
+                                    ? CircularProgressIndicator(
+                                        color: theme.colorScheme.primary,
+                                      )
+                                    : const Text("Register"),
+                              ),
                             ),
                             const SizedBox(height: 20),
                             Row(
