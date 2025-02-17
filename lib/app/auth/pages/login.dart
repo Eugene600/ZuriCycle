@@ -18,7 +18,6 @@ class Login extends ConsumerStatefulWidget {
 class _LoginState extends ConsumerState<Login> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _hidePassword = true;
-  // bool _loading = false;
 
   void _togglePassword() {
     setState(() {
@@ -29,6 +28,8 @@ class _LoginState extends ConsumerState<Login> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userState = ref.watch(userNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -53,8 +54,9 @@ class _LoginState extends ConsumerState<Login> {
                     child: Text(
                       "ZuriCycle".toUpperCase(),
                       style: TextStyle(
-                          fontSize: theme.textTheme.displayLarge?.fontSize,
-                          color: theme.colorScheme.primary),
+                        fontSize: theme.textTheme.displayLarge?.fontSize,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -120,47 +122,79 @@ class _LoginState extends ConsumerState<Login> {
                             ]),
                           ),
                           const SizedBox(height: 20),
-                          OutlinedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState?.saveAndValidate() ??
-                                  false) {
-                                final email =
-                                    _formKey.currentState?.value['email'];
-                                final password =
-                                    _formKey.currentState?.value['password'];
 
-                                ref
-                                    .read(userNotifierProvider.notifier)
-                                    .login(email, password);
-                              }
-                            },
-                            child: const Text("Login"),
+                          /// **Login Button with Loading State**
+                          ElevatedButton(
+                            onPressed: userState is AsyncLoading
+                                ? null
+                                : () async {
+                                    if (_formKey.currentState
+                                            ?.saveAndValidate() ??
+                                        false) {
+                                      final email =
+                                          _formKey.currentState?.value['email'];
+                                      final password = _formKey
+                                          .currentState?.value['password'];
+
+                                      final contextBeforeAwait =
+                                          context; // Store context before async call
+
+                                      final result = await ref
+                                          .read(userNotifierProvider.notifier)
+                                          .login(email, password);
+
+                                      if (contextBeforeAwait.mounted) {
+                                        // Check mounted on stored context
+                                        if (result.contains("successful")) {
+                                          ScaffoldMessenger.of(
+                                                  contextBeforeAwait)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content:
+                                                  Text("Login successful!"),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                          contextBeforeAwait
+                                              .goNamed(RouteNames.HOME_SCREEN);
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                                  contextBeforeAwait)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  "Login failed, please try again"),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                            child: userState is AsyncLoading
+                                ? const CircularProgressIndicator()
+                                : const Text("Login"),
                           ),
 
                           const SizedBox(height: Constants.SPACING),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Text("Don't have an account,"),
+                              const Text("Don't have an account?"),
                               TextButton(
-                                  onPressed: () {
-                                    context.goNamed(
-                                        RouteNames.REGISTRATION_SCREEN);
-                                  },
-                                  child: const Text("Create an Account")),
+                                onPressed: () {
+                                  context
+                                      .goNamed(RouteNames.REGISTRATION_SCREEN);
+                                },
+                                child: Text(
+                                  "Create an Account",
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                          // const SizedBox(height: Constants.SPACING),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.start,
-                          //   children: [
-                          //     const Text("Can't remember your password,"),
-                          //     TextButton(
-                          //       onPressed: () {},
-                          //       child: const Text("Forgot Password"),
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
                     ),

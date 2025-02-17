@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
+import 'package:zuricycle/app/main_pages/home_screen.dart';
 
 import '../../utils/utils.dart';
 
@@ -23,6 +24,13 @@ class RouterNotifier extends ChangeNotifier {
             return const WelcomeScreen();
           },
           routes: authRoutes,
+        ),
+        GoRoute(
+          name: RouteNames.HOME_SCREEN,
+          path: '/home-screen',
+          builder: (BuildContext context, GoRouterState state) {
+            return const HomeScreen();
+          },
         ),
       ];
 
