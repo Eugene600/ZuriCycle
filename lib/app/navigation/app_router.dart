@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
-import 'package:zuricycle/app/main_pages/home_screen.dart';
 
 import '../../utils/utils.dart';
+import '../main_pages/main_pages.dart';
 
 final routesProvider = Provider<GoRouter>((ref) {
   final router = RouterNotifier();
@@ -29,8 +29,31 @@ class RouterNotifier extends ChangeNotifier {
           name: RouteNames.HOME_SCREEN,
           path: '/home-screen',
           builder: (BuildContext context, GoRouterState state) {
-            return const HomeScreen();
+            return const MainScreen();
           },
+          routes: [
+            GoRoute(
+              name: RouteNames.CALENDAR_SCREEN,
+              path: '/calendar-screen',
+              builder: (BuildContext context, GoRouterState state) {
+                return const CalendarScreen();
+              },
+            ),
+            GoRoute(
+              name: RouteNames.SETTINGS_SCREEN,
+              path: '/settings-screen',
+              builder: (BuildContext context, GoRouterState state) {
+                return const SettingsScreen();
+              },
+            ),
+            GoRoute(
+              name: RouteNames.PROFILE_SCREEN,
+              path: '/profile-screen',
+              builder: (BuildContext context, GoRouterState state) {
+                return const ProfileScreen();
+              },
+            ),
+          ],
         ),
       ];
 
