@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,14 +58,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               PopupMenuItem(
                 value: 'settings',
                 child: ListTile(
-                  leading: Icon(Icons.settings, color: theme.colorScheme.onBackground),
+                  leading: Icon(Icons.settings,
+                      color: theme.colorScheme.onBackground),
                   title: const Text('Settings'),
                 ),
               ),
               PopupMenuItem(
                 value: 'logout',
                 child: ListTile(
-                  leading: Icon(Icons.logout, color: theme.colorScheme.onBackground),
+                  leading:
+                      Icon(Icons.logout, color: theme.colorScheme.onBackground),
                   title: const Text('Logout'),
                 ),
               ),
@@ -91,6 +95,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const Spacer(),
             Column(
               children: [
+                const Text(
+                  "❤️",
+                  style: TextStyle(fontSize: 88),
+                ).animate().shake(duration: 1.seconds),
                 Text(
                   "Period",
                   style: theme.textTheme.bodySmall?.copyWith(
