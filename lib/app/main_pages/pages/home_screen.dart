@@ -44,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.account_circle),
+          onPressed: () {},
+        ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
