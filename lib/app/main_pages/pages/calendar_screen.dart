@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
@@ -9,160 +8,96 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen>
-    with SingleTickerProviderStateMixin {
-  DateTime _focusedDay = DateTime.now();
-  late AnimationController _glowAnimationController;
-  late Animation<double> _glowAnimation;
+class _CalendarScreenState extends State<CalendarScreen> {
+  final DateTime _focusedDay = DateTime.now();
 
-  @override
-  void initState() {
-    super.initState();
+  final DateTime _fertileStart = DateTime(2025, 3, 3);
+  final DateTime _ovulationDay = DateTime(2025, 3, 8);
+  final DateTime _fertileEnd = DateTime(2025, 3, 10);
 
-    _glowAnimationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _glowAnimation = Tween<double>(begin: 2, end: 10).animate(
-      CurvedAnimation(
-        parent: _glowAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _glowAnimationController.dispose();
-    super.dispose();
-  }
-
+  /// Other Highlighted Dates (Period Days)
   final Map<DateTime, Color> _highlightedDates = {
-    for (var date in [
-      DateTime(2025, 3, 3),
-      DateTime(2025, 3, 4),
-      DateTime(2025, 3, 5),
-      DateTime(2025, 3, 6),
-      DateTime(2025, 3, 7),
-      DateTime(2025, 3, 8),
-      DateTime(2025, 3, 24),
-      DateTime(2025, 3, 25),
-      DateTime(2025, 3, 26),
-      DateTime(2025, 3, 27),
-      DateTime(2025, 3, 28),
-      DateTime(2025, 2, 17),
-      DateTime(2025, 2, 18),
-      DateTime(2025, 2, 19),
-      DateTime(2025, 2, 20),
-      DateTime(2025, 2, 21),
-    ])
-      DateTime(date.year, date.month, date.day):
-          date.month == 3 && date.day == 8
-              ? Colors.blue
-              : (date.month == 3 && date.day >= 3 && date.day <= 7)
-                  ? Colors.green
-                  : (date.month == 3 && date.day >= 24 && date.day <= 28)
-                      ? Colors.yellow
-                      : Colors.pink,
+    DateTime(2025, 3, 24): Colors.pinkAccent,
+    DateTime(2025, 3, 25): Colors.pinkAccent,
+    DateTime(2025, 3, 26): Colors.pinkAccent,
+    DateTime(2025, 3, 27): Colors.pinkAccent,
+    DateTime(2025, 3, 28): Colors.pinkAccent,
+    DateTime(2025, 2, 17): Colors.pinkAccent,
+    DateTime(2025, 2, 18): Colors.pinkAccent,
+    DateTime(2025, 2, 19): Colors.pinkAccent,
+    DateTime(2025, 2, 20): Colors.pinkAccent,
+    DateTime(2025, 2, 21): Colors.pinkAccent,
   };
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: const Text("Calendar Section"),
-            pinned: true,
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.info_rounded),
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text("📅 Calendar Section"),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.info_rounded),
           ),
-
-          SliverToBoxAdapter(
-            child: TableCalendar(
-              firstDay: DateTime(2020),
-              lastDay: DateTime(2030),
-              focusedDay: _focusedDay,
-              calendarFormat: CalendarFormat.month,
-              headerVisible: true,
-              calendarStyle: const CalendarStyle(
-                isTodayHighlighted: true,
-                todayDecoration: BoxDecoration(
-                  color: Colors.pinkAccent,
-                  shape: BoxShape.circle,
-                ),
-                defaultDecoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                weekendDecoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
+        ],
+      ),
+      body: Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime(2020),
+            lastDay: DateTime(2030),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+            ),
+            focusedDay: _focusedDay,
+            calendarFormat: CalendarFormat.month,
+            headerVisible: true,
+            calendarStyle: const CalendarStyle(
+              defaultDecoration: BoxDecoration(
+                shape: BoxShape.circle,
               ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekendStyle: TextStyle(color: theme.colorScheme.onBackground),
-                weekdayStyle: TextStyle(color: theme.colorScheme.onBackground),
+              todayDecoration: BoxDecoration(), // Removes highlight
+              todayTextStyle: TextStyle(
+                color: Colors.black, // Ensures today’s date remains visible
+                fontWeight:
+                    FontWeight.normal, // Keeps it consistent with other dates
               ),
-              calendarBuilders: CalendarBuilders(
-                defaultBuilder: (context, day, focusedDay) {
-                  DateTime normalizedDay =
-                      DateTime(day.year, day.month, day.day);
-                  if (_highlightedDates.containsKey(normalizedDay)) {
-                    Color baseColor = _highlightedDates[normalizedDay]!;
-
-                    return AnimatedBuilder(
-                      animation: _glowAnimationController,
-                      builder: (context, child) {
-                        double glow = _glowAnimation.value;
-                        Color glowColor = baseColor.withOpacity(
-                          (0.6 + (glow / 20)).clamp(0.0, 1.0),
-                        );
-
-                        return Container(
-                          margin: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: baseColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: glowColor,
-                                blurRadius: glow,
-                                spreadRadius: glow / 2,
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              day.day.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return null;
-                },
+              weekendDecoration: BoxDecoration(
+                shape: BoxShape.circle,
               ),
             ),
-          ),
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+                
+                /// Check if the date is in the fertile window
+                if (normalizedDay.isAfter(_fertileStart.subtract(const Duration(days: 1))) &&
+                    normalizedDay.isBefore(_fertileEnd.add(const Duration(days: 1)))) {
+                  
+                  Color fertileColor = _getFertileGradientColor(normalizedDay);
+                  
+                  return _buildHighlightedDay(day, fertileColor);
+                }
 
-          /// Gradient Container with Buttons
-          SliverToBoxAdapter(
+                /// Check for other highlighted dates (periods)
+                if (_highlightedDates.containsKey(normalizedDay)) {
+                  Color baseColor = _highlightedDates[normalizedDay]!;
+                  return _buildHighlightedDay(day, baseColor);
+                }
+                return null;
+              },
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          /// Gradient Container (Expands to Fill Remaining Space)
+          Expanded(
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   colors: [
                     Color(0xFFFF758C),
                     Color(0xFFFF7EB3),
@@ -171,13 +106,17 @@ class _CalendarScreenState extends State<CalendarScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Add action here
+                      // Log today's symptoms action
                     },
                     icon: const Icon(Icons.add, color: Colors.white),
                     label: const Text(
@@ -192,10 +131,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 15),
                   OutlinedButton.icon(
                     onPressed: () {
-                      // Add action here
+                      // View cycle history action
                     },
                     icon: const Icon(Icons.bar_chart, color: Colors.white),
                     label: const Text(
@@ -210,14 +149,14 @@ class _CalendarScreenState extends State<CalendarScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 15),
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Add action here
+                      // Edit periods action
                     },
-                    icon: const Icon(Icons.health_and_safety, color: Colors.white),
+                    icon: const Icon(Icons.edit_calendar, color: Colors.white),
                     label: const Text(
-                      "Get Personalized Advice",
+                      "Edit Periods",
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -233,6 +172,43 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Function to determine color intensity based on fertile day position
+  Color _getFertileGradientColor(DateTime date) {
+    int totalDays = _fertileEnd.difference(_fertileStart).inDays;
+    int daysFromStart = date.difference(_fertileStart).inDays;
+    int daysFromOvulation = date.difference(_ovulationDay).inDays.abs();
+
+    /// Define color brightness variation
+    double intensity = (daysFromStart / totalDays).clamp(0.0, 1.0);
+    if (date == _ovulationDay) {
+      intensity = 1.0; // Ovulation is the brightest
+    } else if (date.isAfter(_ovulationDay)) {
+      intensity = 1.0 - (daysFromOvulation / 2); // Gradually dim after ovulation
+    }
+
+    return Color.lerp(Colors.blue.shade200, Colors.blue.shade800, intensity)!;
+  }
+
+  /// Widget for highlighted days
+  Widget _buildHighlightedDay(DateTime day, Color color) {
+    return Container(
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          day.day.toString(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
