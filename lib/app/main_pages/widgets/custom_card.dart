@@ -53,27 +53,3 @@ class CustomCard extends StatelessWidget {
   }
 }
 
-
-// const CustomCard(
-                    //   title: "Ovulation",
-                    //   subtitle: "in three days",
-                    //   icon: Icons.wb_sunny,
-                    // ),
-                    // const SizedBox(height: 10,),
-                    // const CustomCard(
-                    //   title: "Next Period",
-                    //   subtitle: "in 14 days",
-                    //   icon: Icons.calendar_today,
-                    // ),
-                    // const SizedBox(height: 10,),
-                    // const CustomCard(
-                    //   title: "Chances of getting pregnant",
-                    //   subtitle: "High",
-                    //   icon: Icons.egg,
-                    // ),
-                    // const SizedBox(height: 10,),
-                    // const CustomCard(
-                    //   title: "Valentine's Day",
-                    //   subtitle: "in three days",
-                    //   icon: Icons.favorite,
-                    // ),

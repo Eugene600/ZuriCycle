@@ -70,7 +70,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                 "ZuriCycle".toUpperCase(),
                                 style: TextStyle(
                                     fontSize:
-                                        theme.textTheme.displayLarge?.fontSize,
+                                        theme.textTheme.displayMedium?.fontSize,
                                     color: theme.colorScheme.primary),
                               ),
                             ),
