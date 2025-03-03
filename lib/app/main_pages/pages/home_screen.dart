@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zuricycle/utils/utils.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -46,14 +48,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.account_circle),
-          onPressed: () {},
+          onPressed: () {
+            context.goNamed(RouteNames.PROFILE_SCREEN);
+          },
         ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
             onSelected: (value) {
               if (value == 'settings') {
-                // Navigate to settings page
+                  context.goNamed(RouteNames.SETTINGS_SCREEN);
               } else if (value == 'logout') {
                 // Handle logout logic
               }

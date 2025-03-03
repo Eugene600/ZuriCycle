@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zuricycle/app/main_pages/pages/stats_screen.dart';
 
 import 'pages.dart';
 
@@ -17,8 +18,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const CalendarScreen(),
-    const SettingsScreen(),
-    const ProfileScreen(),
+    const StatScreen(),
+    const SettingsScreen(),  
   ];
 
   void _onItemTapped(int index) {
@@ -45,12 +46,12 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.bar_chart),  // <-- Stats Icon
+            label: 'Stats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Profile',
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
         type: BottomNavigationBarType.shifting,

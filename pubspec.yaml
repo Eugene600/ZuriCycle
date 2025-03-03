@@ -48,6 +48,9 @@ dependencies:
   table_calendar: ^3.0.9
   intl: ^0.18.1
   flutter_animate: ^4.5.2
+  flutter_charts: ^0.5.2
+  syncfusion_flutter_charts: ^28.2.6
+  fl_chart: ^0.63.0
 
 dev_dependencies:
   flutter_test:

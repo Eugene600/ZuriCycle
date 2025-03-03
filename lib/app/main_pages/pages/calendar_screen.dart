@@ -31,6 +31,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("📅 Calendar Section"),
@@ -52,17 +53,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
             focusedDay: _focusedDay,
             calendarFormat: CalendarFormat.month,
             headerVisible: true,
-            calendarStyle: const CalendarStyle(
-              defaultDecoration: BoxDecoration(
+            calendarStyle: CalendarStyle(
+              defaultDecoration: const BoxDecoration(
                 shape: BoxShape.circle,
               ),
-              todayDecoration: BoxDecoration(), // Removes highlight
+              todayDecoration: const BoxDecoration(), // Removes highlight
               todayTextStyle: TextStyle(
-                color: Colors.black, // Ensures today’s date remains visible
+                color: theme.colorScheme.onBackground, // Ensures today’s date remains visible
                 fontWeight:
                     FontWeight.normal, // Keeps it consistent with other dates
               ),
-              weekendDecoration: BoxDecoration(
+              weekendDecoration: const BoxDecoration(
                 shape: BoxShape.circle,
               ),
             ),
