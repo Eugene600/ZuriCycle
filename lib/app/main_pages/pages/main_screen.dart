@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const CalendarScreen(),
     const StatScreen(),
-    const SettingsScreen(),  
+    const ProfileScreen(),  
   ];
 
   void _onItemTapped(int index) {
@@ -50,8 +50,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Stats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
         type: BottomNavigationBarType.shifting,

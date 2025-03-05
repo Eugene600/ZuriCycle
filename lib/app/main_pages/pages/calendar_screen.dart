@@ -59,7 +59,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
               todayDecoration: const BoxDecoration(), // Removes highlight
               todayTextStyle: TextStyle(
-                color: theme.colorScheme.onBackground, // Ensures today’s date remains visible
+                color: theme.colorScheme.onSurface, // Ensures today’s date remains visible
                 fontWeight:
                     FontWeight.normal, // Keeps it consistent with other dates
               ),
@@ -125,7 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.6),
+                      backgroundColor: Colors.black.withValues(),
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -161,7 +161,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.6),
+                      backgroundColor: Colors.black.withValues(),
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -191,7 +191,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       intensity = 1.0 - (daysFromOvulation / 2); // Gradually dim after ovulation
     }
 
-    return Color.lerp(Colors.blue.shade200, Colors.blue.shade800, intensity)!;
+    return Color.lerp(Colors.deepPurpleAccent.shade100, Colors.deepPurpleAccent.shade700, intensity)!;
   }
 
   /// Widget for highlighted days

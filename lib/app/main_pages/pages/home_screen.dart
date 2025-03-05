@@ -46,12 +46,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () {
-            context.goNamed(RouteNames.PROFILE_SCREEN);
-          },
-        ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
@@ -67,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 value: 'settings',
                 child: ListTile(
                   leading: Icon(Icons.settings,
-                      color: theme.colorScheme.onBackground),
+                      color: theme.colorScheme.onSurface),
                   title: const Text('Settings'),
                 ),
               ),
@@ -75,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 value: 'logout',
                 child: ListTile(
                   leading:
-                      Icon(Icons.logout, color: theme.colorScheme.onBackground),
+                      Icon(Icons.logout, color: theme.colorScheme.onSurface),
                   title: const Text('Logout'),
                 ),
               ),
@@ -124,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     style: theme.textTheme.displayMedium?.copyWith(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(),
                     ),
                   ),
                 ),
@@ -164,14 +158,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.background,
+                color: theme.colorScheme.surface,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(),
                     blurRadius: 10,
                     spreadRadius: 2,
                   )
@@ -198,9 +192,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
                   weekendStyle:
-                      TextStyle(color: theme.colorScheme.onBackground),
+                      TextStyle(color: theme.colorScheme.onSurface),
                   weekdayStyle:
-                      TextStyle(color: theme.colorScheme.onBackground),
+                      TextStyle(color: theme.colorScheme.onSurface),
                 ),
               ),
             ),
