@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zuricycle/utils/utils.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -14,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  DateTime _focusedDay = DateTime.now();
+  final DateTime _focusedDay = DateTime.now();
   late AnimationController _textController;
   late Animation<double> _textFadeAnimation;
 
@@ -50,21 +47,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
             onSelected: (value) {
-              if (value == 'settings') {
-                  context.goNamed(RouteNames.SETTINGS_SCREEN);
-              } else if (value == 'logout') {
+              // if (value == 'settings') {
+              //     context.goNamed(RouteNames.SETTINGS_SCREEN);
+              // } 
+              if (value == 'logout') {
                 // Handle logout logic
               }
             },
             itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  leading: Icon(Icons.settings,
-                      color: theme.colorScheme.onSurface),
-                  title: const Text('Settings'),
-                ),
-              ),
+              // PopupMenuItem(
+              //   value: 'settings',
+              //   child: ListTile(
+              //     leading: Icon(Icons.settings,
+              //         color: theme.colorScheme.onSurface),
+              //     title: const Text('Settings'),
+              //   ),
+              // ),
               PopupMenuItem(
                 value: 'logout',
                 child: ListTile(
@@ -118,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     style: theme.textTheme.displayMedium?.copyWith(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white.withValues(),
+                      color: Colors.white,
                     ),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:vibration/vibration_presets.dart';
 import 'package:zuricycle/app/main_pages/pages/stats_screen.dart';
-
+import 'package:vibration/vibration.dart';
 import 'pages.dart';
 
 
@@ -22,7 +23,10 @@ class _MainScreenState extends State<MainScreen> {
     const ProfileScreen(),  
   ];
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async{
+    if (await Vibration.hasVibrator()) {
+      Vibration.vibrate(preset: VibrationPreset.singleShortBuzz);
+    }
     setState(() {
       _selectedIndex = index;
     });

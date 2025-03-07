@@ -125,7 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black.withValues(),
+                      backgroundColor: Colors.black.withValues(alpha: 0.6),
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -161,7 +161,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black.withValues(),
+                      backgroundColor: Colors.black.withValues(alpha: 0.6),
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
