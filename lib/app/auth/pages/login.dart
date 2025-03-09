@@ -137,14 +137,14 @@ class _LoginState extends ConsumerState<Login> {
                                             _formKey.currentState?.value['email'];
                                         final password = _formKey
                                             .currentState?.value['password'];
-                            
+
                                         final contextBeforeAwait =
                                             context; // Store context before async call
-                            
+
                                         final result = await ref
                                             .read(userNotifierProvider.notifier)
                                             .login(email, password);
-                            
+
                                         if (contextBeforeAwait.mounted) {
                                           // Check mounted on stored context
                                           if (result.contains("successful")) {
@@ -180,7 +180,6 @@ class _LoginState extends ConsumerState<Login> {
                                   : const Text("Login"),
                             ),
                           ),
-
                           const SizedBox(height: Constants.SPACING),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,

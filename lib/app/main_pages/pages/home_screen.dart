@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zuricycle/app/auth/providers/user_provider.dart';
 
+import '../../../utils/utils.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   final DateTime _focusedDay = DateTime.now();
   late AnimationController _textController;
   late Animation<double> _textFadeAnimation;
@@ -49,9 +54,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             onSelected: (value) {
               // if (value == 'settings') {
               //     context.goNamed(RouteNames.SETTINGS_SCREEN);
-              // } 
+              // }
               if (value == 'logout') {
-                // Handle logout logic
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                    title: const Text("Confirm Logout"),
+                    content: const Text("Are you sure you want to logout?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          context.pop();
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(userNotifierProvider.notifier).logout();
+                  
+                          context.goNamed(RouteNames.LOGIN_SCREEN);
+                        },
+                        child: const Text("Logout"),
+                      ),
+                    ],
+                  );
+                  },
+                );
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -189,10 +218,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
-                  weekendStyle:
-                      TextStyle(color: theme.colorScheme.onSurface),
-                  weekdayStyle:
-                      TextStyle(color: theme.colorScheme.onSurface),
+                  weekendStyle: TextStyle(color: theme.colorScheme.onSurface),
+                  weekdayStyle: TextStyle(color: theme.colorScheme.onSurface),
                 ),
               ),
             ),

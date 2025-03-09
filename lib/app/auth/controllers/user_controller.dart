@@ -19,7 +19,6 @@ class UserNotifier extends StateNotifier<AsyncValue<String?>> {
         return "Login failed: $error";
       },
       (tokenPair) {
-        // LocalStorage.saveToken(tokenPair);
         state = const AsyncValue.data("Login successful");
         return "Login successful";
       },
@@ -40,6 +39,23 @@ class UserNotifier extends StateNotifier<AsyncValue<String?>> {
         state = const AsyncValue.data("Registration successful");
         return "Registration successful";
       },
+    );
+  }
+
+  Future<String> logout() async{
+    state = AsyncValue.loading();
+
+    final result = await _userRepository.logout();
+
+    return result.fold(
+      (error) {
+        state = AsyncValue.error(error, StackTrace.current);
+        return "Logout failed";
+      }, 
+      (success) {
+        state = AsyncValue.data("Login Successful");
+        return success;
+      }
     );
   }
 }

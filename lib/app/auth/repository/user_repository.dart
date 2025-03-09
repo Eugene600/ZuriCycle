@@ -16,4 +16,8 @@ class UserRepository {
   Future<Either<String, TokenPair>> login(String email, String password) async {
     return await _userService.login(email, password);
   }
+
+  Future<Either<String, String>> logout() async {
+    return await _userService.logout();
+  }
 }
