@@ -42,4 +42,27 @@ class LocalStorage{
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
   }
+
+  static Future<void> saveUserData(String userId, String gender) async{
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_id', userId);
+    await prefs.setString('gender', gender); 
+  }
+
+  static Future<Map<String, dynamic>?> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final String? userId = prefs.getString('user_id') ;
+    final String? gender = prefs.getString('gender');
+
+    if (userId == null || gender == null) return null;
+
+    return {'user_id': userId, 'gender': gender};
+  }
+
+  static Future<void> deleteUserData() async{
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_id');
+    await prefs.remove('gender');
+  }
 }
