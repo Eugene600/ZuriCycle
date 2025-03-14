@@ -21,6 +21,25 @@ class UserService {
         var jsonData = jsonDecode(response.body);
         debugPrint("Register Response JSON: $jsonData");
 
+        if (jsonData.containsKey('User')) {
+          var userData = jsonData['user'];
+
+          String? userId = userData['user_id'];
+          String? gender = userData['gender'];
+
+          if (userId != null && gender != null) {
+            await LocalStorage.saveUserData(userId, gender);
+            debugPrint("Saved User ID: $userId");
+            debugPrint("Saved Gender: $gender");
+          } else {
+            debugPrint("User ID or Gender missing in response");
+            return Left("User Id or Gender Missing in response");
+          }
+        } else {
+          debugPrint("User object missing in the response");
+          return const Left("User object missing in the response");
+        }
+
         // Extract tokens properly
         var tokens = jsonData['tokens'] as Map<String, dynamic>?;
 
@@ -77,18 +96,48 @@ class UserService {
         var jsonData = jsonDecode(response.body);
         debugPrint("Login Response JSON: $jsonData");
 
-        // Save the tokens in local storage
-        if (jsonData['access'] != null && jsonData['refresh'] != null) {
-          TokenPair tokenPair = TokenPair(
-            access: jsonData['access'],
-            refresh: jsonData['refresh'],
-          );
-          await LocalStorage.saveToken(tokenPair);
+        // Check if the 'user' key exists in the response
+        if (jsonData.containsKey('user')) {
+          var userData = jsonData['user'];
 
-          return Right(tokenPair);
+          // Extract user_id and gender from the user object
+          String? userId = userData['user_id'];
+          String? gender = userData['gender'];
+
+          if (userId != null && gender != null) {
+            await LocalStorage.saveUserData(userId, gender);
+            debugPrint("Saved User ID: $userId");
+            debugPrint("Saved Gender: $gender");
+          } else {
+            debugPrint("User ID or Gender missing in response");
+            return const Left("User ID or Gender missing in response");
+          }
         } else {
-          debugPrint('Missing access or refresh token in the response');
-          return const Left('Missing access or refresh token in the response');
+          debugPrint("User object missing in the response");
+          return const Left("User object missing in the response");
+        }
+
+        // Check if the 'tokens' key exists in the response
+        if (jsonData.containsKey('tokens')) {
+          var tokensData = jsonData['tokens'];
+
+          // Extract access and refresh tokens from the tokens object
+          if (tokensData['access'] != null && tokensData['refresh'] != null) {
+            TokenPair tokenPair = TokenPair(
+              access: tokensData['access'],
+              refresh: tokensData['refresh'],
+            );
+            await LocalStorage.saveToken(tokenPair);
+
+            return Right(tokenPair);
+          } else {
+            debugPrint('Missing access or refresh token in the response');
+            return const Left(
+                'Missing access or refresh token in the response');
+          }
+        } else {
+          debugPrint('Tokens object missing in the response');
+          return const Left('Tokens object missing in the response');
         }
       } else {
         debugPrint("Login Error: ${response.body}");
@@ -133,6 +182,47 @@ class UserService {
       }
     } catch (e) {
       return Left("Error logging out: $e");
+    }
+  }
+
+  Future<Either<String, User>> getUser() async {
+    try {
+      final tokenPair = await LocalStorage.getToken();
+      final userData = await LocalStorage.getUserData();
+
+      if (userData == null || !userData.containsKey('user_id')) {
+        return const Left('User ID not found in local storage');
+      }
+
+      if (tokenPair == null) {
+        return Left("Tokens not found");
+      }
+
+      String userId = userData['user_id'];
+
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${tokenPair.access}"
+      };
+
+      var response = await http.get(
+          Uri.parse("${Constants.BASE_URL}/user/$userId/"),
+          headers: headers);
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        debugPrint("Get User Response JSON: $jsonData");
+
+        final user = User.fromJson(jsonData);
+        return Right(user);
+      } else {
+        debugPrint("Get User Error: ${response.body}");
+        return Left(
+            "Failed to fetch user. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint('Error fetching user: $e');
+      return Left("Error getting user $e");
     }
   }
 }

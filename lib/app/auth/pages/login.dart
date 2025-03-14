@@ -29,7 +29,7 @@ class _LoginState extends ConsumerState<Login> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userState = ref.watch(userNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -127,7 +127,7 @@ class _LoginState extends ConsumerState<Login> {
                           /// **Login Button with Loading State**
                           Center(
                             child: OutlinedButton(
-                              onPressed: userState is AsyncLoading
+                              onPressed: authState is AsyncLoading
                                   ? null
                                   : () async {
                                       if (_formKey.currentState
@@ -142,7 +142,7 @@ class _LoginState extends ConsumerState<Login> {
                                             context; // Store context before async call
 
                                         final result = await ref
-                                            .read(userNotifierProvider.notifier)
+                                            .read(authNotifierProvider.notifier)
                                             .login(email, password);
 
                                         if (contextBeforeAwait.mounted) {
@@ -173,7 +173,7 @@ class _LoginState extends ConsumerState<Login> {
                                         }
                                       }
                                     },
-                              child: userState is AsyncLoading
+                              child: authState is AsyncLoading
                                   ? CircularProgressIndicator(
                                       color: theme.colorScheme.primary,
                                     )

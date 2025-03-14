@@ -20,4 +20,8 @@ class UserRepository {
   Future<Either<String, String>> logout() async {
     return await _userService.logout();
   }
+
+  Future<Either<String, User>> getUser() async {
+    return await _userService.getUser();
+  }
 }

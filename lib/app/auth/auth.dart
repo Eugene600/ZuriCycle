@@ -1,4 +1,4 @@
-export "controllers/user_controller.dart";
+export "controllers/controllers.dart";
 export "models/models.dart";
 export "pages/pages.dart";
 export "repository/user_repository.dart";

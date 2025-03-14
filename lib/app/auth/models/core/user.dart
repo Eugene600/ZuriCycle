@@ -4,11 +4,12 @@ part 'user.freezed.dart';
 part 'user.g.dart';
 
 @freezed
-class User with _$User {
+abstract class User with _$User {
   const factory User({
     required String first_name,
     required String last_name,
     required String email,
+    String? user_id,
     required String phone_number,
     required String gender,
     String? birth_date,

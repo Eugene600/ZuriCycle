@@ -71,7 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                       TextButton(
                         onPressed: () {
-                          ref.read(userNotifierProvider.notifier).logout();
+                          ref.read(authNotifierProvider.notifier).logout();
                   
                           context.goNamed(RouteNames.LOGIN_SCREEN);
                         },

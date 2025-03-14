@@ -2,11 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth.dart';
 
-class UserNotifier extends StateNotifier<AsyncValue<String?>> {
+class AuthNotifier extends StateNotifier<AsyncValue<String>> {
   final UserRepository _userRepository;
 
-  UserNotifier(this._userRepository) : super(const AsyncValue<String?>.data(null));
-
+  AuthNotifier(this._userRepository) : super(const AsyncValue<String>.data(""));
 
   Future<String> login(String email, String password) async {
     state = const AsyncValue.loading();

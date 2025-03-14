@@ -29,7 +29,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    final userState = ref.watch(userNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -237,7 +237,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                             const SizedBox(height: 20),
                             Center(
                               child: OutlinedButton(
-                                onPressed: userState is AsyncLoading
+                                onPressed: authState is AsyncLoading
                                     ? null
                                     : () async {
                                         if (_formKey.currentState
@@ -272,7 +272,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                                           final result = await ref
                                               .read(
-                                                  userNotifierProvider.notifier)
+                                                  authNotifierProvider.notifier)
                                               .register(user);
 
                                           if (contextBeforeAwait.mounted) {
@@ -302,7 +302,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                           }
                                         }
                                       },
-                                child: userState is AsyncLoading
+                                child: authState is AsyncLoading
                                     ? CircularProgressIndicator(
                                         color: theme.colorScheme.primary,
                                       )
