@@ -48,19 +48,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               size: 50, color: Colors.white),
                         ),
                         const SizedBox(height: 12),
+                        user != null ?
                         Text(
-                          "${user?.first_name} ${user?.last_name}",
+                          "${user.first_name} ${user.last_name}",
                           style: const TextStyle(
                               fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
+                        ) : Text("No user found"),
                         const SizedBox(height: 8),
+                        user != null ?
                         Text(
-                          user!.email,
+                          user.email,
                           style:
                               TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
+                        ): Text("No email found"),
                         const SizedBox(height: 20),
-
                         // User Information
                       ],
                     ),
@@ -84,8 +85,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 title: const Text("Phone Number",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(user.phone_number,
-                                    style: const TextStyle(fontSize: 16)),
+                                subtitle: user != null ?Text(user.phone_number,
+                                    style: const TextStyle(fontSize: 16)) : Text("No Phone Number found")
                               ),
                               ListTile(
                                 leading: Icon(Icons.male,
@@ -93,8 +94,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 title: const Text("Gender",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(user.gender,
-                                    style: const TextStyle(fontSize: 16)),
+                                subtitle: user != null ?Text(user.gender,
+                                    style: const TextStyle(fontSize: 16)): Text("No gender found")
                               ),
                               ListTile(
                                 leading: Icon(Icons.cake,
@@ -102,8 +103,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 title: const Text("Birth Date",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(user.birth_date!,
-                                    style: const TextStyle(fontSize: 16)),
+                                subtitle: user != null ? Text(user.birth_date ?? "No birth date found",
+                                    style: const TextStyle(fontSize: 16)) : Text("No birth date found")
                               ),
                             ],
                           ),
