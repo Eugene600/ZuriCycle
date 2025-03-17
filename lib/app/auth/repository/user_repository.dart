@@ -24,4 +24,8 @@ class UserRepository {
   Future<Either<String, User>> getUser() async {
     return await _userService.getUser();
   }
+
+  Future<Either<String, String>> deleteUser() async {
+    return await _userService.deleteUser();
+  }
 }

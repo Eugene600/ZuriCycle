@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
+
+import '../../../utils/utils.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -46,13 +49,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "${user.first_name} ${user.last_name}",
+                          "${user?.first_name} ${user?.last_name}",
                           style: const TextStyle(
                               fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          user.email,
+                          user!.email,
                           style:
                               TextStyle(fontSize: 16, color: Colors.grey[600]),
                         ),
@@ -173,7 +176,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
                                 onTap: () {
-                                  // _showConfirmationDialog(context, "Delete Account", "This will permanently delete your account. Are you sure?");
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text("Delete Account"),
+                                        content: const Text(
+                                            "Are you sure you want to delete your account? This will permanenty delete your account."),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              context.pop();
+                                            },
+                                            // style: ButtonStyle(backgroundColor: Colors.red),
+                                            child: const Text("Cancel"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              ref
+                                                  .read(userNotifierProvider
+                                                      .notifier)
+                                                  .deleteUser();
+
+                                              context.goNamed(
+                                                  RouteNames.LOGIN_SCREEN);
+                                            },
+                                            child: const Text("Delete"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
                                 },
                               ),
                             ],

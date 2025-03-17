@@ -9,7 +9,7 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 
 
 final userNotifierProvider =
-    StateNotifierProvider<UserNotifier, AsyncValue<User>>((ref) {
+    StateNotifierProvider<UserNotifier, AsyncValue<User?>>((ref) {
   final repository = ref.read(userRepositoryProvider);
   return UserNotifier(repository);
 });

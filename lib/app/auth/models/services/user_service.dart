@@ -21,7 +21,7 @@ class UserService {
         var jsonData = jsonDecode(response.body);
         debugPrint("Register Response JSON: $jsonData");
 
-        if (jsonData.containsKey('User')) {
+        if (jsonData.containsKey('user')) {
           var userData = jsonData['user'];
 
           String? userId = userData['user_id'];
@@ -223,6 +223,50 @@ class UserService {
     } catch (e) {
       debugPrint('Error fetching user: $e');
       return Left("Error getting user $e");
+    }
+  }
+
+  Future<Either<String, String>> deleteUser() async {
+    try {
+      final tokenPair = await LocalStorage.getToken();
+      final userData = await LocalStorage.getUserData();
+
+      if (userData == null || !userData.containsKey('user_id')) {
+        return Left("User ID not found in local Storage");
+      }
+
+      if (tokenPair == null) {
+        return Left("Tokens not found");
+      }
+
+      String userId = userData['user_id'];
+
+      var headers = {
+        "Content-type": "application/json",
+        "Authorization": "Bearer ${tokenPair.access}",
+      };
+
+      var response = await http.delete(
+        Uri.parse("${Constants.BASE_URL}/user/delete/$userId/"),
+        headers: headers,
+      );
+
+      debugPrint("Delete response Status Code: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        await LocalStorage.deleteUserData();
+        await LocalStorage.deleteToken();
+
+        debugPrint("User deleted successfully");
+        return Right("User account deleted successfully");
+      } else {
+        debugPrint("Delete User Error: ${response.body}");
+        return Left(
+            "Failed to delete user. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint('Error deleting user: $e');
+      return Left("Error deleting user: $e");
     }
   }
 }
