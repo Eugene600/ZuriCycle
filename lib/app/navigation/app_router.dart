@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
+import 'package:zuricycle/features/logs/pages/logs_screen.dart';
 
 import '../../utils/utils.dart';
 import '../main_pages/main_pages.dart';
@@ -38,6 +39,7 @@ class RouterNotifier extends ChangeNotifier {
               builder: (BuildContext context, GoRouterState state) {
                 return const CalendarScreen();
               },
+              routes: calendarRoutes,
             ),
             GoRoute(
               name: RouteNames.SETTINGS_SCREEN,
@@ -70,6 +72,16 @@ class RouterNotifier extends ChangeNotifier {
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
         return const RegistrationScreen();
+      },
+    ),
+  ];
+
+  List<GoRoute> calendarRoutes = [
+    GoRoute(
+      name: RouteNames.LOGS_SCREEN,
+      path: '/logs-screen',
+      builder: (BuildContext context, GoRouterState state) {
+        return const LogsScreen();
       },
     ),
   ];

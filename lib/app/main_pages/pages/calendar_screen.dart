@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../../../utils/utils.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -117,7 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Log today's symptoms action
+                      context.goNamed(RouteNames.LOGS_SCREEN);
                     },
                     icon: const Icon(Icons.add, color: Colors.white),
                     label: const Text(
