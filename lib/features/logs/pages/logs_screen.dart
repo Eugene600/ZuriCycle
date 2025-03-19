@@ -16,6 +16,34 @@ class LogsScreen extends ConsumerStatefulWidget {
 
 class _LogsScreenState extends ConsumerState<LogsScreen> {
   DateTime selectedDate = DateTime.now();
+  late ScrollController _scrollController;
+  bool isAtBottom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_checkScrollPosition);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _checkScrollPosition() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 50) {
+      // User has scrolled to the bottom
+      setState(() {
+        isAtBottom = true;
+      }); 
+    } else {
+      setState(() {
+        isAtBottom = false;
+      });
+    }
+  }
 
   void updateDate(int days) {
     setState(() {
@@ -32,6 +60,11 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     var theme = Theme.of(context);
 
     String formattedDate = DateFormat('EEEE, MMM d').format(selectedDate);
+
+     final selectedEntries = ref.watch(selectedEntriesProvider);
+
+    bool hasSelectedEntries =
+        selectedEntries.values.any((entries) => entries.isNotEmpty);
 
     final List<Map<String, dynamic>> categories = [
       {
@@ -99,144 +132,167 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     ];
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            leading: IconButton(
-                onPressed: () {
-                  context.pop(RouteNames.CALENDAR_SCREEN);
-                },
-                icon: Icon(Icons.arrow_back)),
-            title: const Text("📝 Logs Screen"),
-            pinned: true,
-            floating: true,
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Column(
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search Categories...",
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () => updateDate(-1),
-                          icon: Icon(Icons.arrow_back)),
-                      Text(formattedDate,
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      if (selectedDate.isBefore(DateTime.now()))        
-                      IconButton(
-                          onPressed: selectedDate.isBefore(DateTime.now())
-                              ? () => updateDate(1)
-                              : null,
-                          icon: Icon(Icons.arrow_forward)),
-                    ],
-                  ),
-                ],
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                leading: IconButton(
+                    onPressed: () {
+                      context.pop(RouteNames.CALENDAR_SCREEN);
+                    },
+                    icon: Icon(Icons.arrow_back)),
+                title: const Text("📝 Logs Screen"),
+                pinned: true,
+                floating: true,
               ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final category = categories[index];
-              final selectedEntries = ref.watch(selectedEntriesProvider);
-              final selectedCategoryEntries =
-                  selectedEntries[category["name"]] ?? {};
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            category["name"],
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface),
-                          ),
-                        ],
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: "Search Categories...",
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, // 2 items per row
-                          childAspectRatio: 4.5, // Adjust for compactness
-                          crossAxisSpacing: 7, // Reduce horizontal spacing
-                          mainAxisSpacing: 7, // Reduce vertical spacing
-                        ),
-                        itemCount: category["entries"].length,
-                        itemBuilder: (context, entryIndex) {
-                          final entry = category["entries"][entryIndex];
-                          final isSelected =
-                              selectedCategoryEntries.contains(entry["name"]);
-
-                          return OutlinedButton.icon(
-                            onPressed: () {
-                              ref.read(selectedEntriesProvider.notifier).state =
-                                  {
-                                ...selectedEntries,
-                                category["name"]: isSelected
-                                    ? selectedCategoryEntries
-                                        .difference({entry["name"]})
-                                    : {
-                                        ...selectedCategoryEntries,
-                                        entry["name"]
-                                      },
-                              };
-                            },
-                            icon: Icon(
-                              entry["icon"],
-                              size: 18,
-                              color: isSelected
-                                  ? Colors.white
-                                  : theme.colorScheme.primary,
-                            ),
-                            label: Text(entry["name"]),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor:
-                                  isSelected ? theme.colorScheme.primary : null,
-                              foregroundColor: isSelected
-                                  ? Colors.white
-                                  : theme.colorScheme.primary,
-                              side:
-                                  BorderSide(color: theme.colorScheme.primary),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          );
-                        },
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                              onPressed: () => updateDate(-1),
+                              icon: Icon(Icons.arrow_back)),
+                          Text(formattedDate,
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          if (selectedDate.isBefore(DateTime.now()))        
+                          IconButton(
+                              onPressed: selectedDate.isBefore(DateTime.now())
+                                  ? () => updateDate(1)
+                                  : null,
+                              icon: Icon(Icons.arrow_forward)),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              );
-            }, childCount: categories.length),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final category = categories[index];
+                  final selectedEntries = ref.watch(selectedEntriesProvider);
+                  final selectedCategoryEntries =
+                      selectedEntries[category["name"]] ?? {};
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                category["name"],
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2, 
+                              childAspectRatio: 4.5, 
+                              crossAxisSpacing: 7, 
+                              mainAxisSpacing: 7, 
+                            ),
+                            itemCount: category["entries"].length,
+                            itemBuilder: (context, entryIndex) {
+                              final entry = category["entries"][entryIndex];
+                              final isSelected =
+                                  selectedCategoryEntries.contains(entry["name"]);
+          
+                              return OutlinedButton.icon(
+                                onPressed: () {
+                                  ref.read(selectedEntriesProvider.notifier).state =
+                                      {
+                                    ...selectedEntries,
+                                    category["name"]: isSelected
+                                        ? selectedCategoryEntries
+                                            .difference({entry["name"]})
+                                        : {
+                                            ...selectedCategoryEntries,
+                                            entry["name"]
+                                          },
+                                  };
+                                },
+                                icon: Icon(
+                                  entry["icon"],
+                                  size: 18,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.primary,
+                                ),
+                                label: Text(entry["name"]),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor:
+                                      isSelected ? theme.colorScheme.primary : null,
+                                  foregroundColor: isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.primary,
+                                  side:
+                                      BorderSide(color: theme.colorScheme.primary),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }, childCount: categories.length),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(height: hasSelectedEntries ? 40 : 0,),
+              ),
+            ],
           ),
+          if (hasSelectedEntries)
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              bottom: isAtBottom ? 0: 20,
+              left: 20,
+              right: 20,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(backgroundColor: theme.colorScheme.primaryContainer, foregroundColor: theme.colorScheme.onPrimaryContainer, fixedSize: Size(40, 40)),
+                onPressed: () {
+                  // Handle apply action here
+                },
+                child: Text("Apply"),
+              ),
+            ),
         ],
       ),
     );
