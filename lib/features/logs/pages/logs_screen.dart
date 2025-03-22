@@ -7,6 +7,8 @@ import 'package:zuricycle/utils/utils.dart';
 final selectedEntriesProvider =
     StateProvider<Map<String, Set<String>>>((ref) => {});
 
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
 class LogsScreen extends ConsumerStatefulWidget {
   const LogsScreen({super.key});
 
@@ -18,17 +20,23 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
   DateTime selectedDate = DateTime.now();
   late ScrollController _scrollController;
   bool isAtBottom = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_checkScrollPosition);
+
+    _searchController.addListener(() {
+      ref.read(searchQueryProvider.notifier).state = _searchController.text;
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -56,6 +64,44 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     });
   }
 
+  List<Map<String, dynamic>> getFilteredCategories(
+      List<Map<String, dynamic>> categories, String query) {
+    if (query.isEmpty) {
+      return categories;
+    }
+
+    final lowerCaseQuery = query.toLowerCase();
+
+    return categories.map((category) {
+      final categoryName = category['name'].toString().toLowerCase();
+      final bool categoryMatches = categoryName.contains(lowerCaseQuery);
+
+      final Map<String, dynamic> filteredCategory = {
+        ...category
+      }; //created a copy of the category
+
+      if (categoryMatches) {
+        return filteredCategory;
+      } else {
+        final List<Map<String, dynamic>> filteredEntries = (category['entries']
+                as List<Map<String, dynamic>>)
+            .where((entry) =>
+                entry['name'].toString().toLowerCase().contains(lowerCaseQuery))
+            .toList();
+
+        filteredCategory['entries'] = filteredEntries;
+
+        return filteredCategory;
+      }
+    }).where((category) {
+      final categoryName = category['name'].toString().toLowerCase();
+      final bool categoryMatches = categoryName.contains(lowerCaseQuery);
+      final bool hasMatchingEntries = (category['entries'] as List).isNotEmpty;
+
+      return categoryMatches || hasMatchingEntries;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -63,6 +109,8 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     String formattedDate = DateFormat('EEEE, MMM d').format(selectedDate);
 
     final selectedEntries = ref.watch(selectedEntriesProvider);
+
+    final searchQuery = ref.watch(searchQueryProvider);
 
     bool hasSelectedEntries =
         selectedEntries.values.any((entries) => entries.isNotEmpty);
@@ -132,6 +180,8 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
       }
     ];
 
+    final filteredCategories = getFilteredCategories(categories, searchQuery);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -155,9 +205,17 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                   child: Column(
                     children: [
                       TextField(
+                        controller: _searchController,
                         decoration: InputDecoration(
                           hintText: "Search Categories...",
                           prefixIcon: Icon(Icons.search),
+                          suffixIcon: searchQuery.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    _searchController.clear();
+                                  },
+                                  icon: Icon(Icons.clear))
+                              : null,
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
                         ),
@@ -174,12 +232,9 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                           Text(formattedDate,
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
-                          if (selectedDate.isBefore(DateTime.now()))
-                            IconButton(
-                                onPressed: selectedDate.isBefore(DateTime.now())
-                                    ? () => updateDate(1)
-                                    : null,
-                                icon: Icon(Icons.arrow_forward)),
+                          IconButton(
+                              onPressed: () => updateDate(1),
+                              icon: Icon(Icons.arrow_forward)),
                         ],
                       ),
                     ],
@@ -188,10 +243,15 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final category = categories[index];
+                  final category = filteredCategories[index];
                   final selectedEntries = ref.watch(selectedEntriesProvider);
                   final selectedCategoryEntries =
                       selectedEntries[category["name"]] ?? {};
+
+                  if ((category['entries'] as List).isEmpty) {
+                    return SizedBox.shrink();
+                  }
+
                   return Card(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -276,7 +336,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                       ),
                     ),
                   );
-                }, childCount: categories.length),
+                }, childCount: filteredCategories.length),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
@@ -285,6 +345,34 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               ),
             ],
           ),
+          if (filteredCategories.isEmpty)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "No matches found",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Try a different search term",
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (hasSelectedEntries)
             AnimatedPositioned(
               duration: Duration(milliseconds: 300),
