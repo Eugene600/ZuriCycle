@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:zuricycle/utils/utils.dart';
 
+import '../models/models.dart';
+
 final selectedEntriesProvider =
     StateProvider<Map<String, Set<String>>>((ref) => {});
 
@@ -118,66 +120,191 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     final List<Map<String, dynamic>> categories = [
       {
         "name": "Sexual Intercourse",
+        "title": "sexual-intercourse",
+        "request": "protection_used",
+        "model": SexualIntercourseLog.fromJson,
         "entries": [
-          {"name": "Protected", "icon": Icons.security},
-          {"name": "Unprotected", "icon": Icons.report_problem},
+          {"name": "Protected", "icon": Icons.security, "value": "protected"},
+          {
+            "name": "Unprotected",
+            "icon": Icons.report_problem,
+            "value": "unprotected"
+          },
         ],
       },
       {
         "name": "Mood",
+        "title": "mood",
+        "request": "mood",
+        "model": MoodLog.fromJson,
         "entries": [
-          {"name": "Happy", "icon": Icons.emoji_emotions},
-          {"name": "Energized", "icon": Icons.bolt},
-          {"name": "Confident", "icon": Icons.emoji_events},
-          {"name": "Optimistic", "icon": Icons.wb_sunny},
-          {"name": "Relaxed", "icon": Icons.airline_seat_recline_extra},
-          {"name": "Focused", "icon": Icons.center_focus_strong},
-          {"name": "Sociable", "icon": Icons.handshake},
-          {"name": "Irritable", "icon": Icons.sentiment_very_dissatisfied},
-          {"name": "Anxious", "icon": Icons.psychology},
-          {"name": "Sad", "icon": Icons.sentiment_dissatisfied},
-          {"name": "Depressed", "icon": Icons.cloud},
-          {"name": "Fatigued", "icon": Icons.nights_stay},
-          {"name": "Stressed", "icon": Icons.speed},
-          {"name": "Restless", "icon": Icons.snooze},
+          {"name": "Happy", "icon": Icons.emoji_emotions, "value": "happy"},
+          {"name": "Energized", "icon": Icons.bolt, "value": "energized"},
+          {
+            "name": "Confident",
+            "icon": Icons.emoji_events,
+            "value": "confident"
+          },
+          {"name": "Optimistic", "icon": Icons.wb_sunny, "value": "optimistic"},
+          {
+            "name": "Relaxed",
+            "icon": Icons.airline_seat_recline_extra,
+            "value": "relaxed"
+          },
+          {
+            "name": "Focused",
+            "icon": Icons.center_focus_strong,
+            "value": "focused"
+          },
+          {"name": "Sociable", "icon": Icons.handshake, "value": "sociable"},
+          {
+            "name": "Irritable",
+            "icon": Icons.sentiment_very_dissatisfied,
+            "value": "irritable"
+          },
+          {"name": "Anxious", "icon": Icons.psychology, "value": "anxious"},
+          {"name": "Sad", "icon": Icons.sentiment_dissatisfied, "value": "sad"},
+          {"name": "Depressed", "icon": Icons.cloud, "value": "depressed"},
+          {"name": "Fatigued", "icon": Icons.nights_stay, "value": "fatigued"},
+          {"name": "Stressed", "icon": Icons.speed, "value": "stressed"},
+          {"name": "Restless", "icon": Icons.snooze, "value": "restless"},
         ],
       },
       {
         "name": "Blood Flow",
+        "title": "blood-flow",
+        "request": "flow_level",
+        "model": BloodFlowLog.fromJson,
         "entries": [
-          {"name": "None", "icon": Icons.not_interested},
-          {"name": "Light", "icon": Icons.invert_colors},
-          {"name": "Spotting", "icon": Icons.brightness_medium},
-          {"name": "Medium", "icon": Icons.invert_colors_off},
-          {"name": "Heavy", "icon": Icons.local_fire_department},
-          {"name": "Very Heavy", "icon": Icons.priority_high},
+          {"name": "None", "icon": Icons.not_interested, "value": "none"},
+          {"name": "Light", "icon": Icons.invert_colors, "value": "light"},
+          {
+            "name": "Spotting",
+            "icon": Icons.brightness_medium,
+            "value": "spotting"
+          },
+          {
+            "name": "Medium",
+            "icon": Icons.invert_colors_off,
+            "value": "medium"
+          },
+          {
+            "name": "Heavy",
+            "icon": Icons.local_fire_department,
+            "value": "heavy"
+          },
+          {
+            "name": "Very Heavy",
+            "icon": Icons.priority_high,
+            "value": "very_heavy"
+          },
         ],
       },
       {
         "name": "Medication",
+        "title": "medication",
+        "request": "medication",
+        "model": MedicationLog.fromJson,
         "entries": [
-          {"name": "Painkillers", "icon": Icons.medication},
-          {"name": "Antibiotics", "icon": Icons.vaccines},
-          {"name": "Birth Control", "icon": Icons.medication_liquid},
+          {
+            "name": "Birth Control Pills",
+            "icon": Icons.medication,
+            "value": "birth_control"
+          },
+          {
+            "name": "Depo-Provera Shot",
+            "icon": Icons.vaccines,
+            "value": "depo_shot"
+          },
+          {
+            "name": "Hormone Therapy",
+            "icon": Icons.medication_liquid,
+            "value": "hormone_therapy"
+          },
+          {
+            "name": "Fertility Drugs",
+            "icon": Icons.local_pharmacy,
+            "value": "fertility_drugs"
+          },
+          {
+            "name": "Pain Relief (e.g., Ibuprofen)",
+            "icon": Icons.healing,
+            "value": "pain_relief"
+          },
+          {
+            "name": "PCOS Medication",
+            "icon": Icons.spa,
+            "value": "pcos_medication"
+          },
+          {
+            "name": "Thyroid Medication",
+            "icon": Icons.health_and_safety,
+            "value": "thyroid_medication"
+          },
+          {
+            "name": "Antidepressants",
+            "icon": Icons.sentiment_satisfied,
+            "value": "antidepressants"
+          },
+          {
+            "name": "Antibiotics",
+            "icon": Icons.medical_services,
+            "value": "antibiotics"
+          },
         ],
       },
       {
         "name": "Symptoms",
+        "title": "symptom",
+        "request": "symptom",
+        "model": SymptomLog.fromJson,
         "entries": [
-          {"name": "Cramps", "icon": Icons.female},
-          {"name": "Low Energy", "icon": Icons.battery_2_bar},
-          {"name": "Mood Swings", "icon": Icons.compare_arrows},
-          {"name": "Increased Energy", "icon": Icons.local_fire_department},
-          {"name": "Clearer Skin", "icon": Icons.face_retouching_natural},
-          {"name": "Clear Cervical Mucus", "icon": Icons.opacity},
-          {"name": "Egg White Cervical Mucus", "icon": Icons.egg_alt},
-          {"name": "Increased Libido", "icon": Icons.favorite_border},
-          {"name": "BBT Rise", "icon": Icons.thermostat_auto},
-          {"name": "Cravings", "icon": Icons.cookie},
-          {"name": "Bloating", "icon": Icons.circle},
-          {"name": "Acne", "icon": Icons.sick},
+          {"name": "Cramps", "icon": Icons.female, "value": "cramps"},
+          {
+            "name": "Low Energy",
+            "icon": Icons.battery_2_bar,
+            "value": "low_energy"
+          },
+          {
+            "name": "Mood Swings",
+            "icon": Icons.compare_arrows,
+            "value": "mood_swings"
+          },
+          {
+            "name": "Increased Energy",
+            "icon": Icons.local_fire_department,
+            "value": "increased_energy"
+          },
+          {
+            "name": "Clearer Skin",
+            "icon": Icons.face_retouching_natural,
+            "value": "clearer_skin"
+          },
+          {
+            "name": "Clear Cervical Mucus",
+            "icon": Icons.opacity,
+            "value": "clear_cervical_mucus"
+          },
+          {
+            "name": "Egg White Cervical Mucus",
+            "icon": Icons.egg_alt,
+            "value": "egg_white_cervical_mucus"
+          },
+          {
+            "name": "Increased Libido",
+            "icon": Icons.favorite_border,
+            "value": "increased_libido"
+          },
+          {
+            "name": "BBT Rise",
+            "icon": Icons.thermostat_auto,
+            "value": "bbt_rise"
+          },
+          {"name": "Cravings", "icon": Icons.cookie, "value": "cravings"},
+          {"name": "Bloating", "icon": Icons.circle, "value": "bloating"},
+          {"name": "Acne", "icon": Icons.sick, "value": "acne"},
         ],
-      }
+      },
     ];
 
     final filteredCategories = getFilteredCategories(categories, searchQuery);
