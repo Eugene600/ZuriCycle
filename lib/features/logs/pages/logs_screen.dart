@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:zuricycle/features/logs/providers/logs_provider.dart';
 import 'package:zuricycle/utils/utils.dart';
 
 import '../models/models.dart';
-
-final selectedEntriesProvider =
-    StateProvider<Map<String, Set<String>>>((ref) => {});
 
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -110,7 +108,9 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
 
     String formattedDate = DateFormat('EEEE, MMM d').format(selectedDate);
 
-    final selectedEntries = ref.watch(selectedEntriesProvider);
+    String reFormattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+    final selectedEntries = ref.watch(logsNotifierProvider);
 
     final searchQuery = ref.watch(searchQueryProvider);
 
@@ -371,7 +371,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final category = filteredCategories[index];
-                  final selectedEntries = ref.watch(selectedEntriesProvider);
+                  final selectedEntries = ref.watch(logsNotifierProvider);
                   final selectedCategoryEntries =
                       selectedEntries[category["name"]] ?? {};
 
@@ -421,17 +421,9 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                               return OutlinedButton.icon(
                                 onPressed: () {
                                   ref
-                                      .read(selectedEntriesProvider.notifier)
-                                      .state = {
-                                    ...selectedEntries,
-                                    category["name"]: isSelected
-                                        ? selectedCategoryEntries
-                                            .difference({entry["name"]})
-                                        : {
-                                            ...selectedCategoryEntries,
-                                            entry["name"]
-                                          },
-                                  };
+                                      .read(logsNotifierProvider.notifier)
+                                      .toggleEntry(
+                                          category['name'], entry['name']);
                                 },
                                 icon: Icon(
                                   entry["icon"],
@@ -512,8 +504,29 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                     backgroundColor: theme.colorScheme.primaryContainer,
                     foregroundColor: theme.colorScheme.onPrimaryContainer,
                     fixedSize: Size(40, 40)),
-                onPressed: () {
-                  // Handle apply action here
+                onPressed: () async {
+                  debugPrint("Re formatted date: $reFormattedDate");
+                  try {
+                    final result = await ref
+                        .read(logsNotifierProvider.notifier)
+                        .submitLogs(categories, reFormattedDate);
+                    if(!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result),
+                        backgroundColor: result.contains("failed")
+                            ? Colors.red
+                            : Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Something wrong has happened. Don't worry, we are working on it."),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 },
                 child: Text("Apply"),
               ),
