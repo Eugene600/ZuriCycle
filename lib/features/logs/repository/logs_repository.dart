@@ -26,11 +26,12 @@ class LogsRepository {
     );
   }
 
-  Future<Either<String, List<T>>> fetchAllLogs<T>({
+  Future<Either<String, List<T>>> fetchLogs<T>({
     required String title,
     required T Function(Map<String, dynamic>) model,
+    required String date,
   }) async {
-    return await _logsService.fetchAllLogs(title, model);
+    return await _logsService.fetchLogs(title, model, date);
   }
 
   Future<Either<String, T>> updateLog<T>({

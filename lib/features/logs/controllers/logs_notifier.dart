@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zuricycle/features/logs/models/models.dart';
 import 'package:zuricycle/features/logs/repository/logs_repository.dart';
 
 class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
@@ -65,6 +66,55 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
 
     state = {};
 
-    return hasErrors ? "Log failed, Please try again" : "Logged changes successfully";
+    return hasErrors
+        ? "Log failed, Please try again"
+        : "Logged changes successfully";
+  }
+
+  Future<void> getLogs(
+      List<Map<String, dynamic>> categories, String date) async {
+    debugPrint("Loading logs for date: $date");
+
+    Map<String, Set<String>> newState = {};
+
+    for (var category in categories) {
+      final categoryName = category['name'];
+      debugPrint("Fetching logs for: $categoryName");
+
+      final result = await _logsRepository.fetchLogs(
+          title: category['title'], model: category['model'], date: date);
+
+      result.fold((error) {
+        debugPrint("Failed to fetch logs for $categoryName: $error");
+
+        newState[categoryName] = {};
+      }, (logs) {
+        debugPrint("Fetched logs for $categoryName: $logs");
+
+        final selectedEntries = logs
+            .map((log) {
+              switch (categoryName) {
+                case 'Sexual Intercourse':
+                  return (log as SexualIntercourseLog).protection_used;
+                case 'Mood':
+                  return (log as MoodLog).mood;
+                case 'Blood Flow':
+                  return (log as BloodFlowLog).flow_level;
+                case 'Medication':
+                  return (log as MedicationLog).medication;
+                case 'Symptoms':
+                  return (log as SymptomLog).symptom;
+                default:
+                  null;
+              }
+            })
+            .whereType<String>()
+            .toSet();
+
+        newState[categoryName] = selectedEntries;
+      });
+    }
+
+    state = newState;
   }
 }

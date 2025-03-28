@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:either_dart/either.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../../local_storage/local_storage.dart';
 import '../../../../utils/utils.dart';
@@ -64,8 +65,8 @@ class LogsService {
     }
   }
 
-  Future<Either<String, List<T>>> fetchAllLogs<T>(
-      String title, T Function(Map<String, dynamic>) model) async {
+  Future<Either<String, List<T>>> fetchLogs<T>(
+      String title, T Function(Map<String, dynamic>) model, String date) async {
     try {
       TokenPair? tokenPair = await LocalStorage.getToken();
       if (tokenPair == null) return const Left("Tokens not found");
@@ -76,12 +77,15 @@ class LogsService {
       };
 
       var response = await http.get(
-        Uri.parse("${Constants.BASE_URL}/$title/list/"),
+        Uri.parse("${Constants.BASE_URL}/logs/$title/date/?date=$date"),
         headers: headers,
       );
 
+
       if (response.statusCode == 200) {
         var jsonData = jsonDecode(response.body);
+        debugPrint("Response body from fetchLogs: $jsonData");
+
         List<T> logs =
             (jsonData['logs'] as List).map((log) => model(log)).toList();
         return Right(logs);
