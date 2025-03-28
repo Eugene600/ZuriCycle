@@ -300,12 +300,11 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
 
     String reFormattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
 
-    final selectedEntries = ref.watch(logsNotifierProvider);
+    final logsState = ref.watch(logsNotifierProvider);
 
     final searchQuery = ref.watch(searchQueryProvider);
 
-    bool hasSelectedEntries =
-        selectedEntries.values.any((entries) => entries.isNotEmpty);
+    bool hasSelectedEntries = logsState.hasChanges;
 
     final filteredCategories = getFilteredCategories(categories, searchQuery);
 
@@ -371,9 +370,8 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final category = filteredCategories[index];
-                  final selectedEntries = ref.watch(logsNotifierProvider);
                   final selectedCategoryEntries =
-                      selectedEntries[category["name"]] ?? {};
+                      logsState.currentEntries[category["name"]] ?? {};
 
                   if ((category['entries'] as List).isEmpty) {
                     return SizedBox.shrink();

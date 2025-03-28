@@ -3,20 +3,49 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zuricycle/features/logs/models/models.dart';
 import 'package:zuricycle/features/logs/repository/logs_repository.dart';
 
-class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
+class LogsState {
+  final Map<String, Set<String>> currentEntries;
+  final Map<String, Set<String>> originalEntries;
+
+  LogsState({required this.currentEntries, required this.originalEntries});
+
+  bool get hasChanges {
+    for (var category in currentEntries.keys) {
+      final current = currentEntries[category] ?? {};
+      final original = originalEntries[category] ?? {};
+
+      if (current != original) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  LogsState copyWith({
+    Map<String, Set<String>>? currentEntries,
+    Map<String, Set<String>>? originalEntries,
+  }) {
+    return LogsState(
+        currentEntries: currentEntries ?? this.currentEntries,
+        originalEntries: originalEntries ?? this.originalEntries);
+  }
+}
+
+class LogsNotifier extends StateNotifier<LogsState> {
   final LogsRepository _logsRepository;
 
-  LogsNotifier(this._logsRepository) : super({});
+  LogsNotifier(this._logsRepository)
+      : super(LogsState(currentEntries: {}, originalEntries: {}));
 
   void toggleEntry(String category, String entry) {
-    final currentEntries = state[category] ?? {};
+    final currentEntries = {...state.currentEntries};
+    final currentCategoryEntries = currentEntries[category] ?? {};
 
-    state = {
-      ...state,
-      category: currentEntries.contains(entry)
-          ? currentEntries.difference({entry})
-          : {...currentEntries, entry}
-    };
+    currentEntries[category] = currentCategoryEntries.contains(entry)
+        ? currentCategoryEntries.difference({entry})
+        : {...currentCategoryEntries, entry};
+
+    state = state.copyWith(currentEntries: currentEntries);
   }
 
   Future<String> submitLogs(
@@ -29,14 +58,15 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
       final categoryName = category['name'];
       debugPrint("Processing category: $categoryName");
 
-      if (!state.containsKey(categoryName)) {
+      if (!state.currentEntries.containsKey(categoryName)) {
         debugPrint("Category $categoryName not found in state. Skipping.");
         continue;
       }
 
-      debugPrint("Entries in state for $categoryName: ${state[categoryName]}");
+      debugPrint(
+          "Entries in state for $categoryName: ${state.currentEntries[categoryName]}");
 
-      for (var entry in state[categoryName]!) {
+      for (var entry in state.currentEntries[categoryName]!) {
         debugPrint("Processing entry: $entry");
 
         final entryData =
@@ -56,6 +86,10 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
 
         result.fold((error) => hasErrors = true, (log) => hasErrors = false);
       }
+    }
+
+    if (!hasErrors) {
+      state = state.copyWith(originalEntries: {...state.currentEntries});
     }
 
     return hasErrors
@@ -119,10 +153,10 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
       });
     }
 
-    state = newState;
+    state = LogsState(currentEntries: newState, originalEntries: {...newState});
   }
 
   void resetState() {
-    state = {};
+    state = LogsState(currentEntries: {}, originalEntries: {});
   }
 }

@@ -9,6 +9,6 @@ final logsRepositoryProvider = Provider<LogsRepository>((ref) {
 });
 
 final logsNotifierProvider =
-    StateNotifierProvider<LogsNotifier, Map<String, Set<String>>>(
+    StateNotifierProvider<LogsNotifier, LogsState>(
   (ref) => LogsNotifier(ref.watch(logsRepositoryProvider)),
 );
