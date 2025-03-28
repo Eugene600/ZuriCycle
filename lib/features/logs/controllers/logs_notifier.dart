@@ -42,13 +42,7 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
         final entryData =
             (category['entries'] as List<Map<String, dynamic>>).firstWhere(
           (e) => e['name'] == entry,
-          // orElse: () => <String, dynamic>{},
         );
-
-        // if (entryData.isEmpty) {
-        //   debugPrint("No entry data found for $entry. Skipping.");
-        //   continue;
-        // }
 
         final value = entryData['value'];
         debugPrint("Entry value: $value");
@@ -63,8 +57,6 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
         result.fold((error) => hasErrors = true, (log) => hasErrors = false);
       }
     }
-
-    state = {};
 
     return hasErrors
         ? "Log failed, Please try again"
@@ -109,6 +101,18 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
               }
             })
             .whereType<String>()
+            .where((value) {
+              return (category['entries'] as List<Map<String, dynamic>>)
+                  .any((e) => e['value'] == value);
+            })
+            .map((value) {
+              final entry = (category['entries'] as List<Map<String, dynamic>>)
+                  .firstWhere(
+                (e) => e['value'] == value,
+              );
+
+              return entry['name'].toString();
+            })
             .toSet();
 
         newState[categoryName] = selectedEntries;
@@ -116,5 +120,9 @@ class LogsNotifier extends StateNotifier<Map<String, Set<String>>> {
     }
 
     state = newState;
+  }
+
+  void resetState() {
+    state = {};
   }
 }

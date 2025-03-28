@@ -213,6 +213,9 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     _searchController.addListener(() {
       ref.read(searchQueryProvider.notifier).state = _searchController.text;
     });
+
+    String initialDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+    ref.read(logsNotifierProvider.notifier).getLogs(categories, initialDate);
   }
 
   @override
