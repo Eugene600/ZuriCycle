@@ -2,28 +2,34 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zuricycle/features/logs/models/models.dart';
 import 'package:zuricycle/features/logs/repository/logs_repository.dart';
+import 'package:collection/collection.dart'; 
 
 class LogsState {
   final Map<String, Set<String>> currentEntries;
-  final Map<String, Set<String>> originalEntries;
+  final Map<String, Map<String, int>> originalEntries;
 
   LogsState({required this.currentEntries, required this.originalEntries});
 
-  bool get hasChanges {
-    for (var category in currentEntries.keys) {
-      final current = currentEntries[category] ?? {};
-      final original = originalEntries[category] ?? {};
+  final setEquality = const SetEquality<String>();
 
-      if (current != original) {
+  bool get hasChanges {
+    final allCategories = {...currentEntries.keys, ...originalEntries.keys};
+    for (var category in allCategories) {
+      final current = currentEntries[category] ?? {};
+      final original = originalEntries[category]?.keys.toSet() ?? {};
+
+      if (!setEquality.equals(current, original)) {
+        debugPrint("Current: $current, Original: $original");
         return true;
-      }
+      } 
     }
+
     return false;
   }
 
   LogsState copyWith({
     Map<String, Set<String>>? currentEntries,
-    Map<String, Set<String>>? originalEntries,
+    Map<String, Map<String, int>>? originalEntries,
   }) {
     return LogsState(
         currentEntries: currentEntries ?? this.currentEntries,
@@ -53,6 +59,10 @@ class LogsNotifier extends StateNotifier<LogsState> {
     bool hasErrors = false;
 
     debugPrint("Submitting logs: Total categories - ${categories.length}");
+
+    Map<String, Map<String, int>> newOriginalEntries = {
+      ...state.originalEntries
+    };
 
     for (var category in categories) {
       final categoryName = category['name'];
@@ -84,12 +94,40 @@ class LogsNotifier extends StateNotifier<LogsState> {
             value: value,
             model: category['model']);
 
-        result.fold((error) => hasErrors = true, (log) => hasErrors = false);
+        result.fold((error) {
+          hasErrors = true;
+        }, (log) {
+          int? logId;
+          switch (categoryName) {
+            case 'Sexual Intercourse':
+              logId = (log as SexualIntercourseLog).id;
+              break;
+            case 'Mood':
+              logId = (log as MoodLog).id;
+              break;
+            case 'Blood Flow':
+              logId = (log as BloodFlowLog).id;
+              break;
+            case 'Medication':
+              logId = (log as MedicationLog).id;
+              break;
+            case 'Symptoms':
+              logId = (log as SymptomLog).id;
+              break;
+            default:
+              logId = null;
+              break;
+          }
+
+          if (logId != null) {
+            newOriginalEntries[categoryName]![value] = logId;
+          }
+        });
       }
     }
 
     if (!hasErrors) {
-      state = state.copyWith(originalEntries: {...state.currentEntries});
+      state = state.copyWith(originalEntries: {...state.originalEntries});
     }
 
     return hasErrors
@@ -101,7 +139,8 @@ class LogsNotifier extends StateNotifier<LogsState> {
       List<Map<String, dynamic>> categories, String date) async {
     debugPrint("Loading logs for date: $date");
 
-    Map<String, Set<String>> newState = {};
+    Map<String, Set<String>> newCurrentEntries = {};
+    Map<String, Map<String, int>> newOriginalEntries = {};
 
     for (var category in categories) {
       final categoryName = category['name'];
@@ -113,47 +152,71 @@ class LogsNotifier extends StateNotifier<LogsState> {
       result.fold((error) {
         debugPrint("Failed to fetch logs for $categoryName: $error");
 
-        newState[categoryName] = {};
+        newCurrentEntries[categoryName] = {};
+        newOriginalEntries[categoryName] = {};
       }, (logs) {
         debugPrint("Fetched logs for $categoryName: $logs");
 
-        final selectedEntries = logs
-            .map((log) {
-              switch (categoryName) {
-                case 'Sexual Intercourse':
-                  return (log as SexualIntercourseLog).protection_used;
-                case 'Mood':
-                  return (log as MoodLog).mood;
-                case 'Blood Flow':
-                  return (log as BloodFlowLog).flow_level;
-                case 'Medication':
-                  return (log as MedicationLog).medication;
-                case 'Symptoms':
-                  return (log as SymptomLog).symptom;
-                default:
-                  null;
-              }
-            })
-            .whereType<String>()
-            .where((value) {
-              return (category['entries'] as List<Map<String, dynamic>>)
-                  .any((e) => e['value'] == value);
-            })
-            .map((value) {
-              final entry = (category['entries'] as List<Map<String, dynamic>>)
-                  .firstWhere(
-                (e) => e['value'] == value,
-              );
+        for (var log in logs) {
+          String? valueKey;
+          int? logId;
 
-              return entry['name'].toString();
-            })
-            .toSet();
+          switch (categoryName) {
+            case 'Sexual Intercourse':
+              valueKey = (log as SexualIntercourseLog).protection_used;
+              logId = log.id;
+              break;
+            case 'Mood':
+              valueKey = (log as MoodLog).mood;
+              logId = log.id;
+              break;
+            case 'Blood Flow':
+              valueKey = (log as BloodFlowLog).flow_level;
+              logId = log.id;
+              break;
+            case 'Medication':
+              valueKey = (log as MedicationLog).medication;
+              logId = log.id;
+              break;
+            case 'Symptoms':
+              valueKey = (log as SymptomLog).symptom;
+              logId = log.id;
+              break;
+            default:
+              valueKey = null;
+              logId = null;
+              break;
+          }
 
-        newState[categoryName] = selectedEntries;
+          if (valueKey != null && logId != null) {
+            final entry = (category['entries'] as List<Map<String, dynamic>>)
+                .firstWhere((e) => e['value'] == valueKey,
+                    orElse: () => <String, Object>{});
+
+            final displayName = entry['name'].toString();
+            debugPrint("Display name is $displayName");
+
+            if (entry.isEmpty) {
+              debugPrint("Warning: No matching entry found for $displayName");
+              continue;
+            }
+
+            newCurrentEntries.putIfAbsent(categoryName, () => {});
+            newOriginalEntries.putIfAbsent(categoryName, () => {});
+
+            if (!newOriginalEntries[categoryName]!.containsKey(displayName)) {
+              newCurrentEntries[categoryName]!.add(displayName);
+            }
+
+            newOriginalEntries[categoryName]![displayName] = logId;
+            debugPrint(
+                "New Current Entries: $newCurrentEntries, New Original Entries: $newOriginalEntries");
+          }
+        }
       });
     }
-
-    state = LogsState(currentEntries: newState, originalEntries: {...newState});
+    state = LogsState(
+        currentEntries: newCurrentEntries, originalEntries: newOriginalEntries);
   }
 
   void resetState() {

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:either_dart/either.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -80,7 +79,6 @@ class LogsService {
         Uri.parse("${Constants.BASE_URL}/logs/$title/date/?date=$date"),
         headers: headers,
       );
-
 
       if (response.statusCode == 200) {
         var jsonData = jsonDecode(response.body);
