@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zuricycle/features/logs/models/models.dart';
 import 'package:zuricycle/features/logs/repository/logs_repository.dart';
-import 'package:collection/collection.dart'; 
+import 'package:collection/collection.dart';
 
 class LogsState {
   final Map<String, Set<String>> currentEntries;
@@ -21,7 +21,7 @@ class LogsState {
       if (!setEquality.equals(current, original)) {
         debugPrint("Current: $current, Original: $original");
         return true;
-      } 
+      }
     }
 
     return false;
@@ -73,16 +73,25 @@ class LogsNotifier extends StateNotifier<LogsState> {
         continue;
       }
 
-      debugPrint(
-          "Entries in state for $categoryName: ${state.currentEntries[categoryName]}");
+      final currentSet = state.currentEntries[categoryName] ?? {};
+      final originalSet =
+          state.originalEntries[categoryName]?.keys.toSet() ?? {};
+      final newEntries = currentSet.difference(originalSet);
 
-      for (var entry in state.currentEntries[categoryName]!) {
+      debugPrint(
+          "Entries in state  for $categoryName: ${state.currentEntries[categoryName]}");
+
+      debugPrint(
+          "Original entries for $categoryName before submitting logs: ${state.originalEntries[categoryName]?.keys}");
+      debugPrint(
+          "Current entries for $categoryName: before submitting logs${state.currentEntries[categoryName]}");
+
+      for (var entry in newEntries) {
         debugPrint("Processing entry: $entry");
 
-        final entryData =
-            (category['entries'] as List<Map<String, dynamic>>).firstWhere(
-          (e) => e['name'] == entry,
-        );
+        final entryData = (category['entries'] as List<Map<String, dynamic>>)
+            .firstWhere((e) => e['name'] == entry,
+                orElse: () => <String, Object>{});
 
         final value = entryData['value'];
         debugPrint("Entry value: $value");
@@ -119,16 +128,23 @@ class LogsNotifier extends StateNotifier<LogsState> {
               break;
           }
 
+          final entryName = entryData['name'];
+
           if (logId != null) {
-            newOriginalEntries[categoryName]![value] = logId;
+            newOriginalEntries[categoryName] ??= {};
+            newOriginalEntries[categoryName]![entryName] = logId;
           }
         });
       }
     }
 
     if (!hasErrors) {
-      state = state.copyWith(originalEntries: {...state.originalEntries});
+      state = state.copyWith(originalEntries: {...newOriginalEntries});
     }
+
+    debugPrint(
+        "Original entries after submitting logs: ${state.originalEntries}");
+    debugPrint("Current entries after submitting logs${state.currentEntries}");
 
     return hasErrors
         ? "Log failed, Please try again"
