@@ -66,6 +66,7 @@ class LogsNotifier extends StateNotifier<LogsState> {
 
     for (var category in categories) {
       final categoryName = category['name'];
+      final categoryTitle = category['title'];
       debugPrint("Processing category: $categoryName");
 
       if (!state.currentEntries.containsKey(categoryName)) {
@@ -77,6 +78,7 @@ class LogsNotifier extends StateNotifier<LogsState> {
       final originalSet =
           state.originalEntries[categoryName]?.keys.toSet() ?? {};
       final newEntries = currentSet.difference(originalSet);
+      final removedEntries = originalSet.difference(currentSet);
 
       debugPrint(
           "Entries in state  for $categoryName: ${state.currentEntries[categoryName]}");
@@ -85,6 +87,15 @@ class LogsNotifier extends StateNotifier<LogsState> {
           "Original entries for $categoryName before submitting logs: ${state.originalEntries[categoryName]?.keys}");
       debugPrint(
           "Current entries for $categoryName: before submitting logs${state.currentEntries[categoryName]}");
+
+      for (var removedEntry in removedEntries) {
+        final logId = state.originalEntries[categoryName]?[removedEntry];
+
+        if (logId != null) {
+          debugPrint("Removing unselected entry: $removedEntry in $categoryName");
+          await deleteLogs(logId, categoryTitle, categoryName, removedEntry);
+        }
+      }    
 
       for (var entry in newEntries) {
         debugPrint("Processing entry: $entry");
@@ -98,7 +109,7 @@ class LogsNotifier extends StateNotifier<LogsState> {
 
         final result = await _logsRepository.addLog(
             date: date,
-            title: category['title'],
+            title: categoryTitle,
             categoryRequest: category['request'],
             value: value,
             model: category['model']);
@@ -217,8 +228,11 @@ class LogsNotifier extends StateNotifier<LogsState> {
               continue;
             }
 
-            newCurrentEntries.putIfAbsent(categoryName, () => {});
-            newOriginalEntries.putIfAbsent(categoryName, () => {});
+            // newCurrentEntries.putIfAbsent(categoryName, () => {});
+            // newOriginalEntries.putIfAbsent(categoryName, () => {});
+
+            newCurrentEntries[categoryName] ??= {};
+            newOriginalEntries[categoryName] ??= {};
 
             if (!newOriginalEntries[categoryName]!.containsKey(displayName)) {
               newCurrentEntries[categoryName]!.add(displayName);
@@ -233,6 +247,32 @@ class LogsNotifier extends StateNotifier<LogsState> {
     }
     state = LogsState(
         currentEntries: newCurrentEntries, originalEntries: newOriginalEntries);
+  }
+
+  Future<void> deleteLogs(int logId, String title, String category, String entry) async{
+
+    final result = await _logsRepository.deleteLog(logId: logId, title: title);
+    result.fold(
+      (error) {
+        debugPrint("Failed to delete log for $entry in $category: $error");
+      },
+      (logs) {
+        final updatedOriginalEntries = {...state.originalEntries};
+        
+        if (updatedOriginalEntries.containsKey(category)) {
+          updatedOriginalEntries[category]?.remove(entry);
+        }
+
+        //if the inner map becomes empty remove the category entirely
+        //eg if 'Moods": {} then just remove Moods entirely
+        if (updatedOriginalEntries[category]!.isEmpty) {
+          updatedOriginalEntries.remove(category);
+        }
+
+        state = state.copyWith(originalEntries: updatedOriginalEntries);
+        debugPrint("Deleted log for $entry in $category. Updated entries: ${state.originalEntries}");
+      }
+      );
   }
 
   void resetState() {

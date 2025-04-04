@@ -109,7 +109,6 @@ class LogsService {
       TokenPair? tokenPair = await LocalStorage.getToken();
       if (tokenPair == null) return const Left("Tokens not found");
 
-      // Build request body dynamically, only including non-null values
       Map<String, dynamic> requestBody = {};
 
       if (date != null) requestBody["date"] = date;
