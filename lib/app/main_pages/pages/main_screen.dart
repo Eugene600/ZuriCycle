@@ -1,45 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vibration/vibration_presets.dart';
-import 'package:zuricycle/app/main_pages/pages/stats_screen.dart';
 import 'package:vibration/vibration.dart';
-import 'pages.dart';
+import '../../../utils/utils.dart';
 
+class MainScreen extends StatelessWidget {
+  final Widget child;
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({super.key, required this.child});
 
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  // List of screens to navigate
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CalendarScreen(),
-    const StatScreen(),
-    const ProfileScreen(),  
+  static const List<String> routeNames = [
+    RouteNames.HOME_SCREEN,
+    RouteNames.CALENDAR_SCREEN,
+    RouteNames.STATS_SCREEN,
+    RouteNames.PROFILE_SCREEN,
   ];
 
-  void _onItemTapped(int index) async{
+  void _onItemTapped(BuildContext context, int index) async {
     if (await Vibration.hasVibrator()) {
       Vibration.vibrate(preset: VibrationPreset.singleShortBuzz);
     }
-    setState(() {
-      _selectedIndex = index;
-    });
+
+    if (!context.mounted) return;
+    context.goNamed(routeNames[index]);
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
+
+    final String location =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+
+    int selectedIndex = 0;
+    if (location.contains('calendar-screen')) {
+      selectedIndex = 1;
+    } else if (location.contains('stats-screen')) {
+      selectedIndex = 2;
+    } else if (location.contains('profile-screen')) {
+      selectedIndex = 3;
+    }
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: selectedIndex,
+        onTap: (index) => _onItemTapped(context, index),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -50,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),  // <-- Stats Icon
+            icon: Icon(Icons.bar_chart),
             label: 'Stats',
           ),
           BottomNavigationBarItem(

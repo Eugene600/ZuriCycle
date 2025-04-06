@@ -6,6 +6,7 @@ class RouteNames{
   static const String HOME_SCREEN = '/home-screen';
   static const String CALENDAR_SCREEN = '/calendar-screen';
   static const String SETTINGS_SCREEN = '/settings-screen';
+  static const String STATS_SCREEN = '/stats-screen';
   static const String PROFILE_SCREEN = '/profile-screen';
   static const String LOGS_SCREEN = '/logs-screen';
 }

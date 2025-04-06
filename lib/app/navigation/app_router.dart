@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
+import 'package:zuricycle/app/main_pages/pages/stats_screen.dart';
 import 'package:zuricycle/features/logs/pages/logs_screen.dart';
 
 import '../../utils/utils.dart';
@@ -17,7 +18,7 @@ final routesProvider = Provider<GoRouter>((ref) {
 });
 
 class RouterNotifier extends ChangeNotifier {
-  List<GoRoute> get routes => [
+  List<RouteBase> get routes => [
         GoRoute(
           name: RouteNames.WELCOME_SCREEN,
           path: '/welcome-screen',
@@ -26,40 +27,41 @@ class RouterNotifier extends ChangeNotifier {
           },
           routes: authRoutes,
         ),
-        GoRoute(
-          name: RouteNames.HOME_SCREEN,
-          path: '/home-screen',
-          builder: (BuildContext context, GoRouterState state) {
-            return const MainScreen();
-          },
-          routes: [
-            GoRoute(
-              name: RouteNames.CALENDAR_SCREEN,
-              path: '/calendar-screen',
-              builder: (BuildContext context, GoRouterState state) {
-                return const CalendarScreen();
-              },
-              routes: calendarRoutes,
-            ),
-            GoRoute(
-              name: RouteNames.SETTINGS_SCREEN,
-              path: '/settings-screen',
-              builder: (BuildContext context, GoRouterState state) {
-                return const SettingsScreen();
-              },
-            ),
-            GoRoute(
-              name: RouteNames.PROFILE_SCREEN,
-              path: '/profile-screen',
-              builder: (BuildContext context, GoRouterState state) {
-                return const ProfileScreen();
-              },
-            ),
-          ],
-        ),
+        ShellRoute(
+            builder: (context, state, child) {
+              return MainScreen(child: child);
+            },
+            routes: [
+              GoRoute(
+                path: '/home-screen',
+                name: RouteNames.HOME_SCREEN,
+                builder: (context, state) => const HomeScreen(),
+              ),
+              GoRoute(
+                  path: '/calendar-screen',
+                  name: RouteNames.CALENDAR_SCREEN,
+                  builder: (context, state) => const CalendarScreen(),
+                  routes: [
+                    GoRoute(
+                      path: '/logs-screen',
+                      name: RouteNames.LOGS_SCREEN,
+                      builder: (context, state) => const LogsScreen(),
+                    ),
+                  ]),
+              GoRoute(
+                path: '/stats-screen',
+                name: RouteNames.STATS_SCREEN,
+                builder: (context, state) => const StatScreen(),
+              ),
+              GoRoute(
+                path: '/profile-screen',
+                name: RouteNames.PROFILE_SCREEN,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ]),
       ];
 
-  List<GoRoute> authRoutes = [
+  List<RouteBase> authRoutes = [
     GoRoute(
       name: RouteNames.LOGIN_SCREEN,
       path: '/login',
@@ -76,7 +78,7 @@ class RouterNotifier extends ChangeNotifier {
     ),
   ];
 
-  List<GoRoute> calendarRoutes = [
+  List<RouteBase> calendarRoutes = [
     GoRoute(
       name: RouteNames.LOGS_SCREEN,
       path: '/logs-screen',
