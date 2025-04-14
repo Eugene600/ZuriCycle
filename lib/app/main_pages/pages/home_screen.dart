@@ -170,7 +170,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 12),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    context.goNamed(RouteNames.LOG_PERIOD);
+                  },
                   child: const Text(
                     "Log Period",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

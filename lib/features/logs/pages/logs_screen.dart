@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:zuricycle/features/logs/providers/logs_provider.dart';
-import 'package:zuricycle/utils/utils.dart';
-
 import '../models/models.dart';
 
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -317,7 +315,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               SliverAppBar(
                 leading: IconButton(
                     onPressed: () {
-                      context.pop(RouteNames.CALENDAR_SCREEN);
+                      context.pop();
                     },
                     icon: Icon(Icons.arrow_back)),
                 title: const Text("📝 Logs Screen"),

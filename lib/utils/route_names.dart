@@ -9,4 +9,5 @@ class RouteNames{
   static const String STATS_SCREEN = '/stats-screen';
   static const String PROFILE_SCREEN = '/profile-screen';
   static const String LOGS_SCREEN = '/logs-screen';
+  static const String LOG_PERIOD = '/log-period';
 }

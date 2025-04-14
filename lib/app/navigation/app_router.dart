@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zuricycle/app/auth/auth.dart';
 import 'package:zuricycle/app/main_pages/pages/stats_screen.dart';
+import 'package:zuricycle/features/cycles/pages/log_period.dart';
 import 'package:zuricycle/features/logs/pages/logs_screen.dart';
 
 import '../../utils/utils.dart';
@@ -36,6 +37,13 @@ class RouterNotifier extends ChangeNotifier {
                 path: '/home-screen',
                 name: RouteNames.HOME_SCREEN,
                 builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: '/log-period',
+                    name: RouteNames.LOG_PERIOD,
+                    builder: (context, state) => LogPeriod(),
+                  ),
+                ]
               ),
               GoRoute(
                   path: '/calendar-screen',
