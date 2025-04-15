@@ -34,8 +34,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<String>> {
         state = AsyncValue.error(error, StackTrace.current);
         return "Registration failed: $error";
       },
-      (userData) { 
+      (userData) async { 
         state = const AsyncValue.data("Registration successful");
+        // await LocalStorage.deleteCycleId();
         return "Registration successful";
       },
     );

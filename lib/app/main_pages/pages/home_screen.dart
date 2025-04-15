@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zuricycle/app/auth/providers/user_provider.dart';
+import 'package:zuricycle/features/cycles/controllers/cycle_notifier.dart';
+import 'package:zuricycle/features/cycles/providers/cycle_provider.dart';
 
 import '../../../utils/utils.dart';
 
@@ -32,6 +34,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       curve: Curves.easeInOut,
     );
     _textController.forward();
+
+    Future.microtask(() async {
+      await ref.read(cycleNotifierProvider.notifier).getCycle();
+    });
   }
 
   @override
@@ -43,6 +49,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cycle = ref.watch(cycleNotifierProvider);
+    final stage = ref.watch(cycleNotifierProvider.notifier).cycleStage();
+    final now = DateTime.now();
+
+    String emoji = '';
+    String title = "";
+    String subtitle = "";
+    String description = "";
+    bool showButton = true;
+
+    // if (cycle == null) {
+    //   return Center(
+    //     child: Text(
+    //       "No cycle data",
+    //       style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+    //     ),
+    //   );
+    // }
+
+    switch (stage) {
+      case CycleStage.period:
+        final periodStart = DateTime.parse(cycle!.period_start);
+        emoji = "❤️";
+        title = "Period";
+        subtitle = "Day ${now.difference(periodStart).inDays + 1}";
+        description = "Low chances of getting pregnant";
+        showButton = false;
+        break;
+      case CycleStage.fertile:
+        final ovulation = DateTime.parse(cycle!.ovulation);
+        emoji = "🌿";
+        title = "Ovulation in";
+        subtitle = "${ovulation.difference(now).inDays} days";
+        description = "High fertility — good chances of conception";
+        break;
+      case CycleStage.ovulation:
+        emoji = "🌕";
+        title = "Ovulation is";
+        subtitle = "Today";
+        description = "Fertile peak — ovulation happening";
+        break;
+      case CycleStage.predicted:
+        emoji = "🩸";
+        title = "Period may happen";
+        subtitle = "Today";
+        description = "You may start your period today";
+        break;
+      case CycleStage.afterOvulation:
+        final predictedPeriodStart =
+            DateTime.parse(cycle!.predicted_period_start);
+        emoji = "🗓️";
+        title = "Next Period";
+        subtitle = "in ${predictedPeriodStart.difference(now).inDays} days";
+        description = "Low chances of getting pregnant";
+        break;
+      case CycleStage.none:
+        emoji = "🗓️";
+        title = "Log Period";
+        subtitle = "Get Started\n\t\t\t\t Today";
+        description = "Track your cycle to stay prepared";
+        break;
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -60,25 +128,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                    title: const Text("Confirm Logout"),
-                    content: const Text("Are you sure you want to logout?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          context.pop();
-                        },
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          ref.read(authNotifierProvider.notifier).logout();
-                  
-                          context.goNamed(RouteNames.LOGIN_SCREEN);
-                        },
-                        child: const Text("Logout"),
-                      ),
-                    ],
-                  );
+                      title: const Text("Confirm Logout"),
+                      content: const Text("Are you sure you want to logout?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            context.pop();
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            ref.read(authNotifierProvider.notifier).logout();
+
+                            context.goNamed(RouteNames.LOGIN_SCREEN);
+                          },
+                          child: const Text("Logout"),
+                        ),
+                      ],
+                    );
                   },
                 );
               }
@@ -124,12 +192,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             const Spacer(),
             Column(
               children: [
-                const Text(
-                  "❤️",
+                Text(
+                  emoji,
                   style: TextStyle(fontSize: 88),
                 ).animate().shake(duration: 1.seconds),
                 Text(
-                  "Period",
+                  title,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -141,7 +209,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 FadeTransition(
                   opacity: _textFadeAnimation,
                   child: Text(
-                    "Day 3",
+                    subtitle,
                     style: theme.textTheme.displayMedium?.copyWith(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -151,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 const SizedBox(height: 70),
                 Text(
-                  "Low Chances of Getting Pregnant",
+                  description,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w400,
@@ -160,24 +228,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                 ),
                 const SizedBox(height: 50),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.pinkAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                if (showButton)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.pinkAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 12),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 12),
+                    onPressed: () {
+                      context.goNamed(RouteNames.LOG_PERIOD);
+                    },
+                    child: const Text(
+                      "Log Period",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  onPressed: () {
-                    context.goNamed(RouteNames.LOG_PERIOD);
-                  },
-                  child: const Text(
-                    "Log Period",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
               ],
             ),
 

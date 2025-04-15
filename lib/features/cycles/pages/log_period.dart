@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zuricycle/features/cycles/providers/cycle_provider.dart';
 
-class LogPeriod extends StatefulWidget {
+
+class LogPeriod extends ConsumerStatefulWidget {
   const LogPeriod({super.key});
 
   @override
-  State<LogPeriod> createState() => _LogPeriodState();
+  ConsumerState<LogPeriod> createState() => _LogPeriodState();
 }
 
-class _LogPeriodState extends State<LogPeriod> {
+class _LogPeriodState extends ConsumerState<LogPeriod> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
@@ -82,7 +85,8 @@ class _LogPeriodState extends State<LogPeriod> {
                     FilledButton(
                         onPressed: () {
                           if (_rangeStart != null && _rangeEnd != null) {
-                            //will add logic
+                            ref.read(cycleNotifierProvider.notifier).postCycle(periodStart: _rangeStart!, periodEnd: _rangeEnd!);
+                            context.pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(

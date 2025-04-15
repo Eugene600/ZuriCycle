@@ -172,6 +172,7 @@ class UserService {
           debugPrint("Logout: $jsonData");
 
           await LocalStorage.deleteToken();
+          await LocalStorage.deleteUserData();
 
           return Right("Successfully Logged Out");
         } else {

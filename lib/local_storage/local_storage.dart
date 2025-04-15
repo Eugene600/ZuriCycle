@@ -15,21 +15,26 @@ class TokenPair {
   }
 }
 
-class LocalStorage{
+class LocalStorage {
   static Future<void> saveToken(TokenPair token) async {
-    if(token.refresh.isEmpty || token.access.isEmpty) debugPrint("Cannot save tokens because they are empty");
+    if (token.refresh.isEmpty || token.access.isEmpty) {
+      debugPrint("Cannot save tokens because they are empty");
+    }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('access_token', token.access);
     await prefs.setString('refresh_token', token.refresh);
-  } 
+  }
 
   static Future<TokenPair?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('access_token');
     final refreshToken = prefs.getString('refresh_token');
 
-    if (accessToken == null || accessToken.isEmpty || refreshToken == null || refreshToken.isEmpty) {
+    if (accessToken == null ||
+        accessToken.isEmpty ||
+        refreshToken == null ||
+        refreshToken.isEmpty) {
       await deleteToken();
       return null;
     }
@@ -43,16 +48,16 @@ class LocalStorage{
     await prefs.remove('refresh_token');
   }
 
-  static Future<void> saveUserData(String userId, String gender) async{
+  static Future<void> saveUserData(String userId, String gender) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_id', userId);
-    await prefs.setString('gender', gender); 
+    await prefs.setString('gender', gender);
   }
 
   static Future<Map<String, dynamic>?> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final String? userId = prefs.getString('user_id') ;
+    final String? userId = prefs.getString('user_id');
     final String? gender = prefs.getString('gender');
 
     if (userId == null || gender == null) return null;
@@ -60,9 +65,27 @@ class LocalStorage{
     return {'user_id': userId, 'gender': gender};
   }
 
-  static Future<void> deleteUserData() async{
+  static Future<void> deleteUserData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_id');
     await prefs.remove('gender');
+  }
+
+  static Future<void> saveCycleId(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('cycle_id', id);
+  }
+
+  static Future<Map<String, int>?> getCycleId() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? cycleId = prefs.getInt('cycle_id');
+
+    if (cycleId == null) return null;
+    return {'cycle_id': cycleId};
+  }
+
+  static Future<void> deleteCycleId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('cycle_id');
   }
 }

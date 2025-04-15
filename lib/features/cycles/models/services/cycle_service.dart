@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:either_dart/either.dart';
+import 'package:flutter/material.dart';
 import 'package:zuricycle/local_storage/local_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,30 +19,39 @@ class CycleService {
         return Left("User Details not found");
       }
 
-      // var userId = userDetails['user_id'];
+      var userId = userDetails['user_id'];
 
       var headers = {
         'Authorization': 'Bearer ${tokenPair.access}',
         'Content-Type': 'application/json',
       };
-      //have to find a way of including user id in request body
+
+      var requestBody = {
+        ...cycle.toJson(),
+        'user_id': userId,
+      };
+
       var response = await http.post(
           Uri.parse("${Constants.BASE_URL}/cycles/add-cycle/"),
           headers: headers,
-          body: jsonEncode(cycle.toJson()));
+          body: jsonEncode(requestBody));
 
       if (response.statusCode == 201) {
         var jsonData = jsonDecode(response.body);
+        debugPrint("Response body of Cycles: $jsonData");
 
         if (jsonData.containsKey('cycle')) {
-          return Right(Cycle.fromJson(jsonData));
+          print("Got it!!!");
+          return Right(Cycle.fromJson(jsonData['cycle']));
         } else {
           return Left("Cycle object is empty");
         }
       } else {
+        debugPrint("Error sending cycle. Status code ${response.statusCode}");
         return Left("Error sending cycle. Status code ${response.statusCode}");
       }
     } catch (e) {
+      debugPrint("Error sending cycle: $e");
       return Left("Error sending cycle: $e");
     }
   }
